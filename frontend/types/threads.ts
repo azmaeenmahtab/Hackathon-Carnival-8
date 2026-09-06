@@ -45,7 +45,7 @@ export interface Thread {
   resolutionNote?: string;
 }
 
-export type ActiveView = "dashboard" | "all" | "follow-up" | "other" | "resolved";
+export type ActiveView = "dashboard" | "all" | "follow-up" | "other" | "resolved" | "priority";
 
 export interface PriorityStats {
   critical: number;

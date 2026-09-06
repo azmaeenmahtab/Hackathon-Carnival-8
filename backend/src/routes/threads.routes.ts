@@ -14,6 +14,7 @@ import {
 } from "../controllers/threads.controller.js";
 import { validate } from "../middleware/validate.js";
 import { THREAD_CATEGORIES } from "../models/Thread.js";
+import { pruneOldResolvedThreads } from "../utils/resolvedThreadCleanup.js";
 
 const router = Router();
 
@@ -44,6 +45,13 @@ router.post("/incoming", validate(incomingEmailSchema), ingestIncomingEmail);
 // Specific routes before param :id
 router.get("/resolved", listResolvedThreads);
 router.post("/resolved/:id/restore", restoreResolvedThread);
+
+// Manual admin purge: deletes resolved threads older than 7 days immediately
+router.post("/resolved/purge-expired", async (_req, res) => {
+  await pruneOldResolvedThreads();
+  res.json({ ok: true, message: "Purge complete — check server logs for count." });
+});
+
 router.get("/follow-up", getFollowUp);
 router.get("/other", getOther);
 
@@ -56,3 +64,4 @@ router.post("/:id/resolve", resolveThread);
 router.patch("/:id/resolve", resolveThread);
 
 export default router;
+

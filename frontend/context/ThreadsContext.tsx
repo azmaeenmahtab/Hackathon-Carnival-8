@@ -47,6 +47,7 @@ interface ThreadsContextType {
   refreshThreads: () => Promise<void>;
   addThread: (thread: Thread) => void;
   resolvedThreads: Thread[];
+  resolvingIds: string[];
   resolveThread: (id: string, note?: string) => Promise<void>;
   restoreResolvedThread: (id: string) => Promise<void>;
   fetchResolvedThreads: () => Promise<void>;
@@ -76,6 +77,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
 
   const [currentUser, setCurrentUser] = useState<FacultyUser | null>(null);
   const [resolvedThreads, setResolvedThreads] = useState<Thread[]>([]);
+  const [resolvingIds, setResolvingIds] = useState<string[]>([]);
 
   const showToast = useCallback(
     (
@@ -286,8 +288,21 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     const target = threads.find((t) => t.id === id);
     if (!target) return;
 
-    // Optimistically remove from active threads
+    // Trigger smooth fade-out state first
+    setResolvingIds((prev) => [...prev, id]);
+
+    showToast(
+      "Thread Resolved",
+      `"${target.subject.substring(0, 35)}..." moved to resolved collection.`,
+      "success"
+    );
+
+    // Wait 500ms for smooth exit animation to finish
+    await new Promise((r) => setTimeout(r, 500));
+
+    // Remove from active threads after animation
     setThreads((prev) => prev.filter((t) => t.id !== id));
+    setResolvingIds((prev) => prev.filter((x) => x !== id));
     if (selectedThread?.id === id) {
       setSelectedThread(null);
     }
@@ -301,12 +316,6 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     };
 
     setResolvedThreads((prev) => [resolvedItem, ...prev]);
-
-    showToast(
-      "Thread Resolved",
-      `"${target.subject.substring(0, 35)}..." moved to resolved collection.`,
-      "success"
-    );
 
     if (isBackendConnected) {
       await apiClient.resolveThread(id, note);
@@ -368,6 +377,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
         refreshThreads,
         addThread,
         resolvedThreads,
+        resolvingIds,
         resolveThread,
         restoreResolvedThread,
         fetchResolvedThreads,

@@ -49,7 +49,11 @@ export const ResolvedThreadSchema = new Schema<IResolvedThread>(
     deadline: { type: Date, default: null },
     aiExplanation: { type: String, default: "" },
     isRead: { type: Boolean, default: true },
-    resolvedAt: { type: Date, default: Date.now, index: true },
+    resolvedAt: {
+      type: Date,
+      default: Date.now,
+      index: { expireAfterSeconds: 604800 }, // ← TTL: auto-delete after 7 days
+    },
     resolutionNote: { type: String, default: "Marked resolved by faculty" },
     lastMessageAt: { type: Date, default: Date.now },
   },

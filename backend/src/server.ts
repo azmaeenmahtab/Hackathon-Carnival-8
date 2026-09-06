@@ -2,6 +2,10 @@ import app from "./app.js";
 import { env } from "./config/env.js";
 import { connectDB } from "./config/db.js";
 import { logger } from "./utils/logger.js";
+import {
+  startResolvedThreadCleanupScheduler,
+  stopResolvedThreadCleanupScheduler,
+} from "./utils/resolvedThreadCleanup.js";
 
 async function bootstrap() {
   try {
@@ -16,6 +20,9 @@ async function bootstrap() {
     connectDB()
       .then(() => {
         logger.info("Database connection established successfully.");
+
+        // 3. Start resolved-thread expiry scheduler (7-day TTL sweep)
+        startResolvedThreadCleanupScheduler();
       })
       .catch((error) => {
         logger.warn(
@@ -26,6 +33,7 @@ async function bootstrap() {
 
     const shutdown = async (signal: string) => {
       logger.info(`${signal} received. Closing HTTP server cleanly...`);
+      stopResolvedThreadCleanupScheduler();
       server.close(() => {
         logger.info("HTTP server closed.");
         process.exit(0);
@@ -41,3 +49,4 @@ async function bootstrap() {
 }
 
 bootstrap();
+

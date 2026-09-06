@@ -15,6 +15,7 @@ import {
   Archive,
   AlertCircle,
   Clock,
+  Mail,
 } from "lucide-react";
 import { Thread, ThreadUrgency, ThreadCategory } from "@/types/threads";
 import { useThreads } from "@/context/ThreadsContext";
@@ -139,9 +140,10 @@ export function getUrgencyStyles(urgency: ThreadUrgency) {
 }
 
 export function ThreadCard({ thread }: { thread: Thread }) {
-  const { selectThread, markAsRead, reclassifyThread, resolveThread } = useThreads();
+  const { selectThread, markAsRead, reclassifyThread, resolveThread, resolvingIds } = useThreads();
   const [showMenu, setShowMenu] = useState(false);
 
+  const isResolving = resolvingIds?.includes(thread.id);
   const effectiveCategory = thread.correctedCategory ?? thread.category;
   const CategoryIcon = getCategoryIcon(effectiveCategory);
   const catStyles = getCategoryStyles(effectiveCategory);
@@ -149,9 +151,23 @@ export function ThreadCard({ thread }: { thread: Thread }) {
 
   return (
     <div
-      onClick={() => selectThread(thread)}
-      className={`group relative bg-white rounded-[28px] p-5 border ${urgencyStyles.cardBorder} transition-all cursor-pointer flex flex-col justify-between min-h-[220px] hover:shadow-md select-none`}
+      onClick={() => {
+        if (!isResolving) selectThread(thread);
+      }}
+      className={`group relative bg-white rounded-[28px] p-5 border ${urgencyStyles.cardBorder} transition-all duration-500 ease-out cursor-pointer flex flex-col justify-between min-h-[220px] select-none ${
+        isResolving
+          ? "opacity-0 scale-95 -translate-y-3 pointer-events-none ring-2 ring-emerald-400 bg-emerald-50/50"
+          : "opacity-100 scale-100 translate-y-0 hover:shadow-md"
+      }`}
     >
+      {/* Smooth Resolving Overlay */}
+      {isResolving && (
+        <div className="absolute inset-0 z-30 bg-emerald-50/95 backdrop-blur-xs rounded-[28px] flex items-center justify-center gap-2 text-emerald-800 font-bold text-xs animate-in fade-in duration-200">
+          <CheckCircle2 className="h-4 w-4 text-emerald-600 animate-bounce" />
+          <span>Resolved — Archiving…</span>
+        </div>
+      )}
+
       {/* Top row: Category Icon, Urgency Pill, & 3-dots Menu */}
       <div>
         <div className="flex items-start justify-between mb-3">
@@ -223,6 +239,17 @@ export function ThreadCard({ thread }: { thread: Thread }) {
               </div>
             )}
           </div>
+        </div>
+
+        {/* Sender Email / Participant */}
+        <div className="flex items-center gap-1.5 text-[11px] font-semibold text-slate-500 mb-1 truncate">
+          <Mail className="h-3 w-3 text-slate-400 shrink-0" />
+          <span className="truncate">
+            {thread.participants?.[0] ||
+              thread.messages?.[0]?.senderEmail ||
+              thread.messages?.[0]?.sender ||
+              "Inbound Mail"}
+          </span>
         </div>
 
         {/* Subject */}
