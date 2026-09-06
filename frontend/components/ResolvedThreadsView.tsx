@@ -110,11 +110,11 @@ export function ResolvedThreadsView() {
 
             const resolvedDate = thread.resolvedAt
               ? new Date(thread.resolvedAt).toLocaleDateString("en-US", {
-                  month: "short",
-                  day: "numeric",
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })
+                month: "short",
+                day: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              })
               : "Recently";
 
             const expiry = getExpiryInfo(thread.resolvedAt);
@@ -123,13 +123,12 @@ export function ResolvedThreadsView() {
               <div
                 key={thread.id}
                 onClick={() => selectThread(thread)}
-                className={`group relative bg-white rounded-[28px] p-5 border shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between min-h-[220px] ${
-                  expiry.isExpired
+                className={`group relative bg-white rounded-[28px] p-5 border shadow-2xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between min-h-[220px] ${expiry.isExpired
                     ? "border-red-200/60 opacity-60"
                     : expiry.isUrgent
-                    ? "border-amber-200/70"
-                    : "border-emerald-200/50"
-                }`}
+                      ? "border-amber-200/70"
+                      : "border-emerald-200/50"
+                  }`}
               >
                 <div>
                   {/* Top Row: Category Icon + Resolved Pill */}
@@ -190,13 +189,12 @@ export function ResolvedThreadsView() {
 
                   {/* Expiry Countdown */}
                   <span
-                    className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full border ${
-                      expiry.isExpired
+                    className={`flex items-center gap-1 text-[10px] font-bold px-2 py-1 rounded-full border ${expiry.isExpired
                         ? "bg-red-50 text-red-600 border-red-200"
                         : expiry.isUrgent
-                        ? "bg-amber-50 text-amber-700 border-amber-200"
-                        : "bg-slate-50 text-slate-500 border-slate-200"
-                    }`}
+                          ? "bg-amber-50 text-amber-700 border-amber-200"
+                          : "bg-slate-50 text-slate-500 border-slate-200"
+                      }`}
                     title="Auto-deleted 7 days after resolve date"
                   >
                     <Timer className="h-3 w-3 shrink-0" />

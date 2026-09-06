@@ -161,9 +161,8 @@ export function ThreadList({ onOpenSimulate }: { onOpenSimulate?: () => void }) 
                 <div
                   key={thread.id}
                   onClick={() => selectThread(thread)}
-                  className={`relative rounded-2xl border p-4 cursor-pointer transition-all hover:shadow-md group ${
-                    urgencyColors[thread.urgency] || "border-slate-200 bg-white"
-                  }`}
+                  className={`relative rounded-2xl border p-4 cursor-pointer transition-all hover:shadow-md group ${urgencyColors[thread.urgency] || "border-slate-200 bg-white"
+                    }`}
                 >
                   {/* Unread dot */}
                   {isUnread && (
@@ -195,15 +194,14 @@ export function ThreadList({ onOpenSimulate }: { onOpenSimulate?: () => void }) 
                       {formatMinutesAgo(thread.lastMessageAt)}
                     </span>
                     <span
-                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${
-                        thread.urgency === "Critical"
+                      className={`text-[9px] font-bold px-2 py-0.5 rounded-full ${thread.urgency === "Critical"
                           ? "bg-rose-100 text-rose-700"
                           : thread.urgency === "High"
-                          ? "bg-amber-100 text-amber-700"
-                          : thread.urgency === "Medium"
-                          ? "bg-sky-100 text-sky-700"
-                          : "bg-slate-100 text-slate-600"
-                      }`}
+                            ? "bg-amber-100 text-amber-700"
+                            : thread.urgency === "Medium"
+                              ? "bg-sky-100 text-sky-700"
+                              : "bg-slate-100 text-slate-600"
+                        }`}
                     >
                       {thread.urgency}
                     </span>
