@@ -1,0 +1,134 @@
+@import "tailwindcss" source(none);
+@source "../src";
+@import "tw-animate-css";
+
+@custom-variant dark (&:is(.dark *));
+
+/*
+ * Design system definition.
+ *
+ * The @theme inline block maps CSS custom properties to Tailwind utility
+ * classes (e.g. --color-primary -> bg-primary, text-primary).
+ *
+ * The :root and .dark blocks define the actual color values using oklch.
+ * All colors MUST use oklch format.
+ *
+ * To add a new semantic color:
+ * 1. Add the variable to :root (light value) and .dark (dark value)
+ * 2. Register it in @theme inline as --color-<name>: var(--<name>)
+ */
+
+@theme inline {
+  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: calc(var(--radius) - 2px);
+  --radius-lg: var(--radius);
+  --radius-xl: calc(var(--radius) + 4px);
+  --radius-2xl: calc(var(--radius) + 8px);
+  --radius-3xl: calc(var(--radius) + 12px);
+  --radius-4xl: calc(var(--radius) + 16px);
+  --font-sans: "IBM Plex Sans", ui-sans-serif, system-ui, sans-serif;
+  --font-serif: "Libre Baskerville", ui-serif, Georgia, serif;
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-card: var(--card);
+  --color-card-foreground: var(--card-foreground);
+  --color-popover: var(--popover);
+  --color-popover-foreground: var(--popover-foreground);
+  --color-primary: var(--primary);
+  --color-primary-foreground: var(--primary-foreground);
+  --color-secondary: var(--secondary);
+  --color-secondary-foreground: var(--secondary-foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-border: var(--border);
+  --color-border-strong: var(--border-strong);
+  --color-input: var(--input);
+  --color-ring: var(--ring);
+  --color-ring-offset-background: var(--background);
+  --color-ai: var(--ai);
+  --color-ai-foreground: var(--ai-foreground);
+  --color-ai-surface: var(--ai-surface);
+  --color-critical: var(--critical);
+  --color-critical-surface: var(--critical-surface);
+  --color-high: var(--high);
+  --color-high-surface: var(--high-surface);
+  --color-medium: var(--medium);
+  --color-medium-surface: var(--medium-surface);
+  --color-low: var(--low);
+  --color-low-surface: var(--low-surface);
+  --shadow-card: 0 1px 2px oklch(0.48 0.1 258 / 0.06), 0 10px 26px -18px oklch(0.48 0.1 258 / 0.22);
+  --shadow-lift: 0 2px 6px oklch(0.48 0.1 258 / 0.08), 0 22px 44px -24px oklch(0.48 0.1 258 / 0.28);
+}
+
+:root {
+  --radius: 0.75rem;
+  --background: oklch(0.947 0.012 92);
+  --foreground: oklch(0.22 0.004 250);
+  --surface: oklch(1 0 0);
+  --surface-muted: oklch(0.963 0.011 92);
+  --card: oklch(1 0 0);
+  --card-foreground: oklch(0.22 0.004 250);
+  --popover: oklch(1 0 0);
+  --popover-foreground: oklch(0.22 0.004 250);
+  --primary: oklch(0.48 0.098 258);
+  --primary-foreground: oklch(0.985 0.008 92);
+  --secondary: oklch(0.885 0.028 180);
+  --secondary-foreground: oklch(0.4 0.09 258);
+  --muted: oklch(0.955 0.01 92);
+  --muted-foreground: oklch(0.5 0.02 250);
+  --accent: oklch(0.905 0.026 180);
+  --accent-foreground: oklch(0.4 0.09 258);
+  --destructive: oklch(0.5 0.17 27);
+  --destructive-foreground: oklch(0.985 0.008 92);
+  --border: oklch(0.885 0.022 230);
+  --border-strong: oklch(0.78 0.045 236);
+  --input: oklch(0.88 0.024 230);
+  --ring: oklch(0.62 0.078 250);
+
+  /* AI reasoning accent */
+  --ai: oklch(0.46 0.09 258);
+  --ai-foreground: oklch(0.38 0.075 254);
+  --ai-surface: oklch(0.945 0.022 182);
+
+  /* Urgency scale — used identically on every screen */
+  --critical: oklch(0.49 0.175 26);
+  --critical-surface: oklch(0.952 0.03 28);
+  --high: oklch(0.56 0.125 52);
+  --high-surface: oklch(0.958 0.035 68);
+  --medium: oklch(0.57 0.085 88);
+  --medium-surface: oklch(0.958 0.032 96);
+  --low: oklch(0.55 0.045 234);
+  --low-surface: oklch(0.95 0.014 210);
+}
+
+@layer base {
+  * {
+    border-color: var(--color-border);
+  }
+
+  body {
+    background-color: var(--color-background);
+    color: var(--color-foreground);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1,
+  h2,
+  h3 {
+    letter-spacing: -0.011em;
+  }
+}
+
+@utility ai-note {
+  color: var(--color-ai-foreground);
+  font-style: italic;
+  line-height: 1.45;
+}
+
