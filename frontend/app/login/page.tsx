@@ -106,9 +106,9 @@ export default function LoginPage() {
 
         <div className="flex items-center justify-center gap-1.5 pt-1">
           <h1 className="text-2xl font-bold tracking-tight text-slate-900 dark:text-slate-50">
-            FacultyInbox
+            MailMind
           </h1>
-          <span className="inline-flex items-center gap-0.5 text-[11px] font-bold uppercase tracking-wider text-indigo-700 bg-indigo-50 border border-indigo-200 px-1.5 py-0.5 rounded-md dark:bg-indigo-950/60 dark:text-indigo-300 dark:border-indigo-800">
+          <span className="inline-flex items-center gap-0.5 text-[11px] font-bold uppercase tracking-wider text-black bg-slate-100 border border-black/[0.1] px-1.5 py-0.5 rounded-md dark:bg-slate-800 dark:text-white dark:border-slate-700">
             <Sparkles className="h-3 w-3" /> AI
           </span>
         </div>

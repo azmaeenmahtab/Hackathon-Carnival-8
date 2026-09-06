@@ -57,7 +57,7 @@ export function Sidebar() {
           </div>
           <div className="flex items-center gap-1.5">
             <span className="font-bold text-slate-950 tracking-tight text-lg font-sans">
-              FacultyAI
+              MailMind
             </span>
           </div>
         </div>

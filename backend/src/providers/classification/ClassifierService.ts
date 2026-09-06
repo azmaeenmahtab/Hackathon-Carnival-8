@@ -148,9 +148,10 @@ export class ClassifierService {
     aiExplanation: string;
   }> {
     const client = this.getClient();
+    const modelToUse = env.LLM_MODEL || "gemini-3.6-flash";
 
     const model = client.getGenerativeModel({
-      model: env.LLM_MODEL,
+      model: modelToUse,
       systemInstruction: CLASSIFIER_SYSTEM_PROMPT,
       generationConfig: {
         // Force structured JSON output — no markdown fences, no prose
@@ -160,18 +161,18 @@ export class ClassifierService {
       },
     });
 
-    // Build the user turn: only the last 3 messages to stay within token budget
+    // Build the user turn: subject + sender + body of recent messages
     const recentMessages = thread.messages.slice(-3);
     const messagesText = recentMessages
-      .map((m) => `[${m.senderIsFaculty ? "PROFESSOR" : "SENDER"}]: ${m.body}`)
+      .map((m) => `[${m.senderIsFaculty ? "PROFESSOR" : "STUDENT/SENDER"} - ${m.sender}]:\n${m.body}`)
       .join("\n\n");
 
-    const userPrompt = `Classify this email thread:
+    const userPrompt = `Analyze and classify this academic email thread based on BOTH the subject line AND full message body context:
 
 Subject: ${thread.subject}
 Participants: ${thread.participants.join(", ")}
 
-Messages (most recent 3):
+Email Message Content:
 ${messagesText}`;
 
     const result = await model.generateContent(userPrompt);
@@ -186,54 +187,105 @@ ${messagesText}`;
       urgency: this.coerceUrgency(parsed.urgency),
       actionNeeded: Boolean(parsed.actionNeeded),
       deadline: parsed.deadline ? new Date(parsed.deadline) : null,
-      aiExplanation: String(parsed.aiExplanation || "Automated email triage."),
+      aiExplanation: String(parsed.aiExplanation || "Automated email triage based on message context."),
     };
   }
 
   /**
-   * Rule-based heuristic fallback when Gemini is unavailable
+   * Rule-based heuristic fallback that analyzes BOTH subject and email body
    */
   private heuristicClassifier(thread: RawThread) {
-    const sub = thread.subject.toLowerCase();
+    const bodyContent = thread.messages.map((m) => m.body).join(" ");
+    const fullText = (thread.subject + " " + bodyContent).toLowerCase();
+    
     let category: ThreadCategory = "Other";
     let urgency: ThreadUrgency = "Low";
     let actionNeeded = false;
     let deadline: Date | null = null;
-    let aiExplanation = "Classified based on thread subject and participant analysis.";
+    let aiExplanation = "Classified based on email subject and message content analysis.";
 
-    if (sub.includes("re-eval") || sub.includes("regrade") || sub.includes("grade dispute")) {
+    if (
+      fullText.includes("re-eval") ||
+      fullText.includes("regrade") ||
+      fullText.includes("grade dispute") ||
+      fullText.includes("marks review") ||
+      fullText.includes("appeal my grade") ||
+      fullText.includes("midterm score")
+    ) {
       category = "Re-evaluation";
       urgency = "High";
       actionNeeded = true;
-      aiExplanation = "Student inquiry regarding grade re-evaluation.";
-    } else if (sub.includes("exam") || sub.includes("midterm") || sub.includes("proctor")) {
+      aiExplanation = "Student requesting grade review or midterm regrade.";
+    } else if (
+      fullText.includes("exam") ||
+      fullText.includes("midterm") ||
+      fullText.includes("proctor") ||
+      fullText.includes("final exam") ||
+      fullText.includes("question paper")
+    ) {
       category = "Examination";
       urgency = "High";
       actionNeeded = true;
-      aiExplanation = "Examination scheduling or exam paper logistics.";
-    } else if (sub.includes("meeting") || sub.includes("sync") || sub.includes("office hours")) {
+      aiExplanation = "Examination logistics or test paper preparation.";
+    } else if (
+      fullText.includes("meeting") ||
+      fullText.includes("sync") ||
+      fullText.includes("office hours") ||
+      fullText.includes("appointment") ||
+      fullText.includes("zoom call")
+    ) {
       category = "Meeting";
       urgency = "Medium";
       actionNeeded = true;
-      aiExplanation = "Meeting scheduling request requiring schedule check.";
-    } else if (sub.includes("student") || sub.includes("accommodation") || sub.includes("integrity")) {
+      aiExplanation = "Meeting or office-hours consultation request.";
+    } else if (
+      fullText.includes("student") ||
+      fullText.includes("accommodation") ||
+      fullText.includes("integrity") ||
+      fullText.includes("medical hardship") ||
+      fullText.includes("illness") ||
+      fullText.includes("hospitalized")
+    ) {
       category = "Student Issue";
       urgency = "High";
       actionNeeded = true;
-      aiExplanation = "Student issue or academic accommodation matter.";
-    } else if (sub.includes("committee") || sub.includes("chair") || sub.includes("payroll")) {
+      aiExplanation = "Student welfare, medical emergency, or academic accommodation.";
+    } else if (
+      fullText.includes("committee") ||
+      fullText.includes("chair") ||
+      fullText.includes("payroll") ||
+      fullText.includes("accreditation") ||
+      fullText.includes("abet") ||
+      fullText.includes("dean")
+    ) {
       category = "Committee/Admin";
       urgency = "Medium";
       actionNeeded = true;
-      aiExplanation = "Department administrative and committee request.";
-    } else if (sub.includes("class") || sub.includes("lab") || sub.includes("room")) {
+      aiExplanation = "Department administration, committee duty, or dean sync.";
+    } else if (
+      fullText.includes("class") ||
+      fullText.includes("lab") ||
+      fullText.includes("room") ||
+      fullText.includes("lecture canceled") ||
+      fullText.includes("reschedule lecture")
+    ) {
       category = "Class/Schedule";
       urgency = "Medium";
-      aiExplanation = "Classroom schedule adjustment notification.";
+      actionNeeded = true;
+      aiExplanation = "Class schedule, room allocation, or lab timing update.";
     }
 
-    if (sub.includes("urgent") || sub.includes("emergency")) {
+    // Urgency detection from both subject and body
+    if (
+      fullText.includes("urgent") ||
+      fullText.includes("emergency") ||
+      fullText.includes("asap") ||
+      fullText.includes("within 24 hours") ||
+      fullText.includes("deadline tomorrow") ||
+      fullText.includes("immediate attention")
+    ) {
       urgency = "Critical";
+      actionNeeded = true;
     }
 
     return { category, urgency, actionNeeded, deadline, aiExplanation };

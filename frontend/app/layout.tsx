@@ -3,7 +3,7 @@ import "./globals.css";
 import { ThreadsProvider } from "@/context/ThreadsContext";
 
 export const metadata: Metadata = {
-  title: "FacultyInbox AI — Intelligent University Email Triage",
+  title: "MailMind — Intelligent University Email Triage",
   description:
     "Intelligent email triage dashboard for university faculty: prioritizing what matters, surfacing AI reasoning, and tracking unanswered threads.",
 };
