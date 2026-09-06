@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
+import { DailyDigestCard } from "@/components/DailyDigestCard";
 import { PriorityStatStrip } from "@/components/PriorityStatStrip";
 import { CategoryFilterTabs } from "@/components/CategoryFilterTabs";
 import { ThreadList } from "@/components/ThreadList";
@@ -10,20 +12,78 @@ import { NeedsFollowUpView } from "@/components/NeedsFollowUpView";
 import { OtherPriorityView } from "@/components/OtherPriorityView";
 import { SimulateEmailModal } from "@/components/SimulateEmailModal";
 import { useThreads } from "@/context/ThreadsContext";
-import {
-  Search,
-  Bell,
-  Plus,
-} from "lucide-react";
+import { authClient } from "@/lib/auth-client";
+import { Search, Bell, Plus } from "lucide-react";
 
 export default function Home() {
-  const { activeView, currentUser, stats } = useThreads();
+  const { activeView, currentUser, stats, setCurrentUser, syncWithBackend } =
+    useThreads();
   const [isSimulateOpen, setIsSimulateOpen] = useState(false);
+  const [authChecked, setAuthChecked] = useState(false);
+  const router = useRouter();
 
-  // Extract first name for friendly greeting (matches "Hi, Dilan!" in reference)
+  // ── Route guard: redirect to /login if no active session ──
+  useEffect(() => {
+    async function checkSession() {
+      try {
+        const session = await authClient.getSession();
+        if (!session?.data?.user) {
+          router.replace("/login");
+          return;
+        }
+        // Sync user into context if not already set
+        if (!currentUser || currentUser.id === "user-vance") {
+          setCurrentUser({
+            id: session.data.user.id,
+            name: session.data.user.name,
+            email: session.data.user.email,
+            department: "Department of Computer Science",
+          });
+        }
+        setAuthChecked(true);
+      } catch {
+        router.replace("/login");
+      }
+    }
+    checkSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  // ── Auto-sync: trigger backend sync after auth is confirmed ──
+  useEffect(() => {
+    if (authChecked) {
+      syncWithBackend();
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [authChecked]);
+
+  // Show loading state while auth is being verified
+  if (!authChecked) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-[#e9edef]">
+        <div className="flex flex-col items-center gap-3">
+          <div className="h-8 w-8 rounded-full border-2 border-black border-t-transparent animate-spin" />
+          <p className="text-xs font-semibold text-slate-500 tracking-wide">
+            Verifying session…
+          </p>
+        </div>
+      </div>
+    );
+  }
+
+  // Extract first name
   const firstName = currentUser?.name
     ? currentUser.name.replace(/^Dr\.\s*/, "").split(" ")[0]
-    : "Eleanor";
+    : "Professor";
+
+  const initials = currentUser?.name
+    ? currentUser.name
+        .split(" ")
+        .filter((w) => w.match(/^[A-Z]/))
+        .slice(-2)
+        .map((w) => w[0])
+        .join("")
+    : "FI";
 
   return (
     <div className="min-h-screen flex font-sans antialiased text-slate-900 bg-[#e9edef] select-none">
@@ -32,12 +92,15 @@ export default function Home() {
 
       {/* Main Dashboard Canvas */}
       <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto pr-6 py-4">
-        {/* Top Header Bar matching reference image ("Hi, Dilan!" + action pills) */}
+        {/* Top Header Bar */}
         <header className="flex items-center justify-between pb-6 pt-2 shrink-0">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 font-sans">
               Hi, {firstName}!
             </h1>
+            <p className="text-xs text-slate-500 font-medium mt-0.5">
+              {currentUser?.email}
+            </p>
           </div>
 
           <div className="flex items-center gap-3">
@@ -71,9 +134,9 @@ export default function Home() {
               )}
             </div>
 
-            {/* User Portrait Avatar */}
+            {/* User Avatar */}
             <div className="h-10 w-10 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-2xs">
-              {firstName.slice(0, 1)}V
+              {initials}
             </div>
           </div>
         </header>
@@ -82,13 +145,9 @@ export default function Home() {
         <div className="space-y-6 flex-1 pb-10">
           {activeView === "dashboard" && (
             <>
-              {/* Top 3 Hero Cards (Overall Information, Weekly Progress, Month Progress) */}
+              <DailyDigestCard />
               <PriorityStatStrip />
-
-              {/* Category Filter Pills */}
               <CategoryFilterTabs />
-
-              {/* Middle (Month goals + Task in process) and Bottom (Last Projects) */}
               <ThreadList onOpenSimulate={() => setIsSimulateOpen(true)} />
             </>
           )}
@@ -101,7 +160,6 @@ export default function Home() {
           )}
 
           {activeView === "follow-up" && <NeedsFollowUpView />}
-
           {activeView === "other" && <OtherPriorityView />}
         </div>
       </main>

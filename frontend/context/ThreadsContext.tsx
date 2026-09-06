@@ -1,6 +1,13 @@
 "use client";
 
-import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { Thread, ThreadCategory, ActiveView, PriorityStats } from "@/types/threads";
 import { INITIAL_MOCK_THREADS } from "@/data/mockThreads";
 import { apiClient } from "@/lib/apiClient";
@@ -23,6 +30,7 @@ interface ThreadsContextType {
   searchQuery: string;
   stats: PriorityStats;
   digest: string;
+  digestGeneratedAt: string | null;
   isBackendConnected: boolean;
   isSyncing: boolean;
   currentUser: FacultyUser | null;
@@ -36,7 +44,13 @@ interface ThreadsContextType {
   markAsRead: (id: string, isRead: boolean) => Promise<void>;
   reclassifyThread: (id: string, newCategory: ThreadCategory) => Promise<void>;
   syncWithBackend: () => Promise<void>;
-  showToast: (title: string, description?: string, type?: "success" | "info" | "warning") => void;
+  refreshThreads: () => Promise<void>;
+  addThread: (thread: Thread) => void;
+  showToast: (
+    title: string,
+    description?: string,
+    type?: "success" | "info" | "warning"
+  ) => void;
 }
 
 const ThreadsContext = createContext<ThreadsContextType | undefined>(undefined);
@@ -51,63 +65,70 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
   const [isBackendConnected, setIsBackendConnected] = useState<boolean>(false);
   const [isSyncing, setIsSyncing] = useState<boolean>(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
-
-  // Default teacher user (Dr. Eleanor Vance) or currently authenticated user
-  const [currentUser, setCurrentUser] = useState<FacultyUser | null>({
-    id: "user-vance",
-    name: "Dr. Eleanor Vance",
-    email: "dr.vance@university.edu",
-    department: "Department of Computer Science",
-  });
-
-  // Default synthetic digest
   const [digest, setDigest] = useState<string>(
-    "You have 2 critical items: a grade re-evaluation request due tomorrow, and an unanswered department meeting invite from 3 days ago. Your final exam submission and TA timesheet approvals also require attention this week."
+    "Checking your inbox status…"
   );
+  const [digestGeneratedAt, setDigestGeneratedAt] = useState<string | null>(null);
 
-  const showToast = (
-    title: string,
-    description?: string,
-    type: "success" | "info" | "warning" = "info"
-  ) => {
-    const id = Math.random().toString(36).substring(2, 9);
-    setToasts((prev) => [...prev, { id, title, description, type }]);
-    setTimeout(() => {
-      setToasts((prev) => prev.filter((t) => t.id !== id));
-    }, 4000);
-  };
+  const [currentUser, setCurrentUser] = useState<FacultyUser | null>(null);
+
+  const showToast = useCallback(
+    (
+      title: string,
+      description?: string,
+      type: "success" | "info" | "warning" = "info"
+    ) => {
+      const id = Math.random().toString(36).substring(2, 9);
+      setToasts((prev) => [...prev, { id, title, description, type }]);
+      setTimeout(() => {
+        setToasts((prev) => prev.filter((t) => t.id !== id));
+      }, 4000);
+    },
+    []
+  );
 
   const dismissToast = (id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
-  // Check backend health & existing session on mount
+  // ── Refresh threads + digest from backend ──────────────────────────────────
+  const refreshThreads = useCallback(async () => {
+    const [threadsRes, digestRes, statsFromBackend] = await Promise.all([
+      apiClient.getThreads({ limit: 100, sort: "urgency" }),
+      apiClient.getDigest(),
+      apiClient.getStats(),
+    ]);
+
+    if (threadsRes && threadsRes.items.length > 0) {
+      setThreads(threadsRes.items);
+    }
+
+    if (digestRes) {
+      setDigest(digestRes.digestText);
+      setDigestGeneratedAt(digestRes.generatedAt);
+    }
+
+    // Update selected thread from fresh data (so detail drawer stays current)
+    if (statsFromBackend) {
+      // stats are computed live from threads locally via useMemo — no need to store
+    }
+  }, []);
+
+  // ── Check backend health on mount ─────────────────────────────────────────
   useEffect(() => {
-    async function checkBackendAndAuth() {
-      try {
-        const healthy = await apiClient.checkHealth();
-        setIsBackendConnected(healthy);
-
-        if (healthy) {
-          const backendDigest = await apiClient.getDigest();
-          if (backendDigest) setDigest(backendDigest);
-
-          // Check if session exists in Better Auth
-          const session = await authClient.getSession();
-          if (session?.data?.user) {
-            setCurrentUser({
-              id: session.data.user.id,
-              name: session.data.user.name,
-              email: session.data.user.email,
-              department: "Department of Computer Science",
-            });
-          }
+    async function checkBackend() {
+      const healthy = await apiClient.checkHealth();
+      setIsBackendConnected(healthy);
+      if (healthy) {
+        // Try to pre-load digest (threads load after auth check in page.tsx)
+        const digestRes = await apiClient.getDigest();
+        if (digestRes) {
+          setDigest(digestRes.digestText);
+          setDigestGeneratedAt(digestRes.generatedAt);
         }
-      } catch {
-        // Fallback to local mode
       }
     }
-    checkBackendAndAuth();
+    checkBackend();
   }, []);
 
   const signOutUser = async () => {
@@ -117,10 +138,12 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
       // ignore
     }
     setCurrentUser(null);
+    setThreads(INITIAL_MOCK_THREADS);
+    setDigest("Sign in to load your AI-triaged inbox.");
     showToast("Signed Out", "You have been logged out of FacultyInbox AI.", "info");
   };
 
-  // Compute live stats based on effective category & urgency
+  // ── Live stats computed from current thread list ───────────────────────────
   const stats: PriorityStats = useMemo(() => {
     let critical = 0;
     let high = 0;
@@ -148,10 +171,11 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
   };
 
   const markAsRead = async (id: string, isRead: boolean) => {
+    // Optimistic local update
     setThreads((prev) =>
       prev.map((t) => (t.id === id ? { ...t, isRead } : t))
     );
-    if (selectedThread && selectedThread.id === id) {
+    if (selectedThread?.id === id) {
       setSelectedThread((prev) => (prev ? { ...prev, isRead } : null));
     }
     if (isBackendConnected) {
@@ -161,29 +185,31 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
 
   const reclassifyThread = async (id: string, newCategory: ThreadCategory) => {
     const targetThread = threads.find((t) => t.id === id);
-    const oldCategory = targetThread?.correctedCategory ?? targetThread?.category;
+    const oldCategory =
+      targetThread?.correctedCategory ?? targetThread?.category;
 
+    // Optimistic local update
     setThreads((prev) =>
       prev.map((t) => {
         if (t.id === id) {
-          const isOther = newCategory === "Other";
           return {
             ...t,
             correctedCategory: newCategory,
-            needsFollowUp: isOther ? false : t.needsFollowUp,
+            needsFollowUp: newCategory === "Other" ? false : t.needsFollowUp,
           };
         }
         return t;
       })
     );
 
-    if (selectedThread && selectedThread.id === id) {
+    if (selectedThread?.id === id) {
       setSelectedThread((prev) =>
         prev
           ? {
               ...prev,
               correctedCategory: newCategory,
-              needsFollowUp: newCategory === "Other" ? false : prev.needsFollowUp,
+              needsFollowUp:
+                newCategory === "Other" ? false : prev.needsFollowUp,
             }
           : null
       );
@@ -191,7 +217,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
 
     showToast(
       `Thread Reclassified`,
-      `Changed from "${oldCategory}" to "${newCategory}".`,
+      `Changed from "${oldCategory}" → "${newCategory}"`,
       "success"
     );
 
@@ -200,32 +226,50 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
-  const syncWithBackend = async () => {
+  // ── Full sync: trigger backend ingestion then refresh ─────────────────────
+  const syncWithBackend = useCallback(async () => {
     setIsSyncing(true);
-    showToast("Connecting to Express Backend...", "Triggering mock sync endpoint.", "info");
-    const syncRes = await apiClient.triggerMockSync();
-    if (syncRes) {
-      showToast(
-        "Sync Completed",
-        `Successfully ingested ${syncRes.ingested} threads from backend.`,
-        "success"
-      );
-      const res = await apiClient.getThreads({ limit: 50 });
-      if (res && res.items.length > 0) {
-        setThreads(res.items);
+    try {
+      const healthy = await apiClient.checkHealth();
+      if (!healthy) {
+        showToast(
+          "Backend Unreachable",
+          "Using local mock data — start the Express server to enable AI triage.",
+          "warning"
+        );
+        setIsSyncing(false);
+        return;
       }
-      const newDigest = await apiClient.getDigest();
-      if (newDigest) setDigest(newDigest);
       setIsBackendConnected(true);
-    } else {
-      showToast(
-        "Backend Unreachable",
-        "Operating seamlessly with local mock data.",
-        "warning"
-      );
+
+      // Check if threads already exist for this user
+      const existing = await apiClient.getThreads({ limit: 1 });
+
+      if (!existing || existing.items.length === 0) {
+        // First time — seed with mock data
+        showToast("Seeding AI Inbox…", "Running mock email sync with AI classification.", "info");
+        const syncRes = await apiClient.triggerMockSync(false);
+        if (syncRes) {
+          showToast(
+            "Inbox Ready",
+            `${syncRes.ingested} threads classified by AI${syncRes.failed > 0 ? ` (${syncRes.failed} failed)` : ""}.`,
+            "success"
+          );
+        }
+      }
+
+      // Load all threads + digest from backend
+      await refreshThreads();
+    } catch {
+      showToast("Sync Error", "Could not reach the backend.", "warning");
+    } finally {
+      setIsSyncing(false);
     }
-    setIsSyncing(false);
-  };
+  }, [refreshThreads, showToast]);
+
+  const addThread = useCallback((thread: Thread) => {
+    setThreads((prev) => [thread, ...prev.filter((t) => t.id !== thread.id)]);
+  }, []);
 
   return (
     <ThreadsContext.Provider
@@ -238,6 +282,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
         searchQuery,
         stats,
         digest,
+        digestGeneratedAt,
         isBackendConnected,
         isSyncing,
         currentUser,
@@ -251,6 +296,8 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
         markAsRead,
         reclassifyThread,
         syncWithBackend,
+        refreshThreads,
+        addThread,
         showToast,
       }}
     >

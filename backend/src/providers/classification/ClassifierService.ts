@@ -1,3 +1,4 @@
+import { GoogleGenerativeAI } from "@google/generative-ai";
 import { RawThread } from "../ingestion/IngestionProvider.js";
 import {
   THREAD_CATEGORIES,
@@ -18,15 +19,70 @@ export interface ClassificationResult {
   error: string | null;
 }
 
+/**
+ * System prompt that defines the AI's role, output schema, and rules.
+ * This is the "persona" injected before any email content is passed in.
+ */
+const CLASSIFIER_SYSTEM_PROMPT = `You are FacultyInbox AI, an intelligent email triage assistant for university professors.
+
+Your job is to read an academic email thread and classify it with precision so the professor can quickly understand what needs attention.
+
+## Classification Categories
+Choose EXACTLY ONE:
+- "Meeting" — meeting requests, office-hours scheduling, calendar invites, sync requests
+- "Class/Schedule" — class cancellations, room changes, lab sessions, lecture logistics
+- "Student Issue" — academic accommodations, personal hardship, integrity concerns, student welfare
+- "Examination" — exam scheduling, proctoring arrangements, question papers, exam logistics
+- "Re-evaluation" — grade disputes, regrade requests, appeal letters, marks review
+- "Committee/Admin" — department meetings, committee work, administrative duties, payroll, HR
+- "Other" — newsletters, IT notices, conference invites, spam, marketing, unrelated university-wide blasts
+
+## Urgency Levels
+- "Critical" — time-sensitive, cannot be delayed (deadline within 24-48h, formal complaint, emergency)
+- "High" — needs attention within 2-3 days, involves student welfare or formal academic processes
+- "Medium" — should be addressed this week, scheduling or informational but requires action
+- "Low" — no action needed soon, informational, or "Other" category items
+
+## Rules
+1. "Other" category items MUST always have urgency "Low" and actionNeeded: false
+2. Grade disputes (Re-evaluation) default to High urgency unless the student explicitly states no rush
+3. Extract deadline dates in ISO 8601 format if mentioned, otherwise return null
+4. aiExplanation must be one clear, concise sentence (max 20 words) explaining WHY this matters to the professor
+5. Never guess — if genuinely unclear, classify as "Other" with Low urgency
+
+## Output Format
+Return ONLY valid JSON matching this exact schema:
+{
+  "category": string,
+  "urgency": string,
+  "actionNeeded": boolean,
+  "deadline": string | null,
+  "aiExplanation": string
+}`;
+
 export class ClassifierService {
+  private genAI: GoogleGenerativeAI | null = null;
+
+  private getClient(): GoogleGenerativeAI {
+    if (!this.genAI) {
+      if (!env.LLM_API_KEY || env.LLM_API_KEY === "YOUR_GEMINI_API_KEY_HERE" || env.LLM_API_KEY === "mock-key-for-dev") {
+        throw new Error("Gemini API key not configured. Set LLM_API_KEY in .env");
+      }
+      this.genAI = new GoogleGenerativeAI(env.LLM_API_KEY);
+    }
+    return this.genAI;
+  }
+
   /**
-   * Classify a raw thread using an LLM or intelligent fallback
+   * Classify a raw thread using Gemini or intelligent fallback
    */
   async classifyThread(thread: RawThread): Promise<ClassificationResult> {
-    // If mock pre-classified fields exist and no active real API key is set, use them
+    // Use pre-classified mock fields if no valid API key is set
     if (
       thread.mockCategory &&
-      (!env.LLM_API_KEY || env.LLM_API_KEY === "mock-key-for-dev")
+      (!env.LLM_API_KEY ||
+        env.LLM_API_KEY === "YOUR_GEMINI_API_KEY_HERE" ||
+        env.LLM_API_KEY === "mock-key-for-dev")
     ) {
       return {
         category: this.coerceCategory(thread.mockCategory),
@@ -41,10 +97,17 @@ export class ClassifierService {
       };
     }
 
-    // Try classification with retry policy (1 retry)
+    // If still no valid API key, fall back to heuristic
+    if (!env.LLM_API_KEY || env.LLM_API_KEY === "YOUR_GEMINI_API_KEY_HERE" || env.LLM_API_KEY === "mock-key-for-dev") {
+      logger.warn({ threadId: thread.externalThreadId }, "No Gemini API key set — using heuristic classifier");
+      const heuristic = this.heuristicClassifier(thread);
+      return { ...heuristic, status: "completed", error: null };
+    }
+
+    // Try Gemini classification with 1 retry
     for (let attempt = 1; attempt <= 2; attempt++) {
       try {
-        const result = await this.callLLM(thread);
+        const result = await this.callGemini(thread);
         return {
           ...result,
           status: "completed",
@@ -53,95 +116,83 @@ export class ClassifierService {
       } catch (err: any) {
         logger.warn(
           { attempt, error: err?.message, threadId: thread.externalThreadId },
-          "Classification attempt failed"
+          "Gemini classification attempt failed"
         );
         if (attempt === 2) {
+          logger.error({ threadId: thread.externalThreadId }, "Gemini classification failed after 2 attempts, using heuristic fallback");
+          const fallback = this.heuristicClassifier(thread);
           return {
-            category: "Other",
-            urgency: "Low",
-            actionNeeded: false,
-            deadline: null,
-            aiExplanation: "Classification failed — please review manually.",
+            ...fallback,
             status: "failed",
-            error: err?.message || "LLM classification failed",
+            error: err?.message || "Gemini classification failed",
           };
         }
+        // Wait 1 second before retry
+        await new Promise((r) => setTimeout(r, 1000));
       }
     }
 
-    return {
-      category: "Other",
-      urgency: "Low",
-      actionNeeded: false,
-      deadline: null,
-      aiExplanation: "Classification failed — please review manually.",
-      status: "failed",
-      error: "Unknown classification failure",
-    };
+    // Should never reach here
+    const fallback = this.heuristicClassifier(thread);
+    return { ...fallback, status: "failed", error: "Unknown classification failure" };
   }
 
-  private async callLLM(thread: RawThread): Promise<{
+  /**
+   * Call Gemini 1.5 Flash with system prompt + structured JSON output
+   */
+  private async callGemini(thread: RawThread): Promise<{
     category: ThreadCategory;
     urgency: ThreadUrgency;
     actionNeeded: boolean;
     deadline: Date | null;
     aiExplanation: string;
   }> {
-    if (!env.LLM_API_KEY || env.LLM_API_KEY === "mock-key-for-dev") {
-      // Rule-based fallback when LLM key is absent
-      return this.heuristicClassifier(thread);
-    }
+    const client = this.getClient();
 
-    // Real LLM call structure
-    const prompt = `You are FacultyInbox AI triage system for a university professor. Analyze this email thread:
-Subject: ${thread.subject}
-Participants: ${thread.participants.join(", ")}
-Messages:
-${thread.messages
-  .slice(-3)
-  .map((m) => `[${m.senderIsFaculty ? "FACULTY" : "OTHER"}]: ${m.body}`)
-  .join("\n")}
-
-Respond strictly with valid JSON with keys:
-{
-  "category": "Meeting" | "Class/Schedule" | "Student Issue" | "Examination" | "Re-evaluation" | "Committee/Admin" | "Other",
-  "urgency": "Low" | "Medium" | "High" | "Critical",
-  "actionNeeded": boolean,
-  "deadline": string (ISO date) or null,
-  "aiExplanation": string (one concise sentence explaining why this matters)
-}`;
-
-    const response = await fetch("https://api.anthropic.com/v1/messages", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-api-key": env.LLM_API_KEY,
-        "anthropic-version": "2023-06-01",
+    const model = client.getGenerativeModel({
+      model: env.LLM_MODEL,
+      systemInstruction: CLASSIFIER_SYSTEM_PROMPT,
+      generationConfig: {
+        // Force structured JSON output — no markdown fences, no prose
+        responseMimeType: "application/json",
+        temperature: 0.1,   // Low temp = deterministic, consistent classification
+        maxOutputTokens: 300,
       },
-      body: JSON.stringify({
-        model: env.LLM_MODEL,
-        max_tokens: 400,
-        messages: [{ role: "user", content: prompt }],
-      }),
     });
 
-    if (!response.ok) {
-      throw new Error(`LLM API returned status ${response.status}`);
-    }
+    // Build the user turn: only the last 3 messages to stay within token budget
+    const recentMessages = thread.messages.slice(-3);
+    const messagesText = recentMessages
+      .map((m) => `[${m.senderIsFaculty ? "PROFESSOR" : "SENDER"}]: ${m.body}`)
+      .join("\n\n");
 
-    const data: any = await response.json();
-    const text = data.content?.[0]?.text;
-    const parsed = JSON.parse(text);
+    const userPrompt = `Classify this email thread:
+
+Subject: ${thread.subject}
+Participants: ${thread.participants.join(", ")}
+
+Messages (most recent 3):
+${messagesText}`;
+
+    const result = await model.generateContent(userPrompt);
+    const responseText = result.response.text();
+
+    logger.debug({ threadId: thread.externalThreadId, response: responseText }, "Gemini classification response");
+
+    const parsed = JSON.parse(responseText);
 
     return {
       category: this.coerceCategory(parsed.category),
       urgency: this.coerceUrgency(parsed.urgency),
       actionNeeded: Boolean(parsed.actionNeeded),
       deadline: parsed.deadline ? new Date(parsed.deadline) : null,
-      aiExplanation: String(parsed.aiExplanation || "Automated email triage explanation."),
+      aiExplanation: String(parsed.aiExplanation || "Automated email triage."),
     };
   }
 
+  /**
+   * Rule-based heuristic fallback when Gemini is unavailable
+   */
   private heuristicClassifier(thread: RawThread) {
     const sub = thread.subject.toLowerCase();
     let category: ThreadCategory = "Other";
@@ -150,7 +201,7 @@ Respond strictly with valid JSON with keys:
     let deadline: Date | null = null;
     let aiExplanation = "Classified based on thread subject and participant analysis.";
 
-    if (sub.includes("re-eval") || sub.includes("regrade") || sub.includes("grade")) {
+    if (sub.includes("re-eval") || sub.includes("regrade") || sub.includes("grade dispute")) {
       category = "Re-evaluation";
       urgency = "High";
       actionNeeded = true;

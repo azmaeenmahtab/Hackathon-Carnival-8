@@ -55,7 +55,7 @@ export function SimulateEmailModal({
   const [body, setBody] = useState(PRESETS[0].body);
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const { threads, selectThread, showToast, isBackendConnected } = useThreads();
+  const { selectThread, showToast, isBackendConnected, refreshThreads, addThread } = useThreads();
 
   if (!isOpen) return null;
 
@@ -132,16 +132,21 @@ export function SimulateEmailModal({
         };
       }
 
-      threads.unshift(createdThread);
+      addThread(createdThread);
 
       showToast(
         "Email Triaged by AI",
-        `Classified as "${createdThread.category}" (${createdThread.urgency})`,
+        `Classified as "${createdThread.category}" (${createdThread.urgency}) — digest updating.`,
         "success"
       );
 
       selectThread(createdThread);
       onClose();
+
+      // Refresh threads + digest from backend to include the new email
+      if (isBackendConnected) {
+        await refreshThreads();
+      }
     } catch (err: any) {
       showToast("Error", err.message || "Failed to triage email.", "warning");
     } finally {

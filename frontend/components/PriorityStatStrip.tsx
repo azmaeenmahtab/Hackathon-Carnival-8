@@ -2,52 +2,71 @@
 
 import React from "react";
 import {
-  Share2,
-  MoreVertical,
-  TrendingUp,
-  Download,
-  RefreshCw,
-  Sparkles,
-  CheckCircle2,
   ClockAlert,
   Mail,
-  AlertOctagon,
+  CheckCircle2,
+  ShieldAlert,
+  AlertCircle,
+  Sparkles,
+  RefreshCw,
+  Archive,
+  ArrowRight,
+  Filter,
 } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
 
 export function PriorityStatStrip() {
   const {
+    threads,
     stats,
-    digest,
     syncWithBackend,
     isSyncing,
     setActiveView,
     selectedUrgency,
     setSelectedUrgency,
+    setSelectedCategory,
   } = useThreads();
+
+  // Noise filtered count (Other category)
+  const noiseThreads = threads.filter(
+    (t) => (t.correctedCategory ?? t.category) === "Other"
+  );
+  const noisePercent =
+    threads.length > 0
+      ? Math.round((noiseThreads.length / threads.length) * 100)
+      : 0;
+
+  // Student & academic core threads
+  const academicThreads = threads.filter(
+    (t) => (t.correctedCategory ?? t.category) !== "Other"
+  );
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      {/* 1. Matte Black Card - "Overall Information" */}
+      {/* 1. Matte Black Card - "Overall Priority Queue" */}
       <div className="bg-[#121214] text-white rounded-[32px] p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
         <div>
           {/* Header */}
           <div className="flex items-center justify-between text-xs text-slate-400 mb-5">
-            <span className="font-semibold tracking-wide text-white">
-              Overall Information
+            <span className="font-semibold tracking-wide text-white flex items-center gap-1.5">
+              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
+              Overall Triage Queue
             </span>
-            <div className="flex items-center gap-2">
-              <button
-                onClick={() => setSelectedUrgency(selectedUrgency === "Critical" ? "All" : "Critical")}
-                className="p-1.5 hover:text-white transition-colors"
-                title="Filter Critical"
-              >
-                <Share2 className="h-3.5 w-3.5" />
-              </button>
-              <button className="p-1.5 hover:text-white transition-colors">
-                <MoreVertical className="h-3.5 w-3.5" />
-              </button>
-            </div>
+            <button
+              onClick={() =>
+                setSelectedUrgency(
+                  selectedUrgency === "Critical" ? "All" : "Critical"
+                )
+              }
+              className={`text-[11px] font-bold px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
+                selectedUrgency === "Critical"
+                  ? "bg-white text-black"
+                  : "bg-white/10 text-slate-300 hover:bg-white/20"
+              }`}
+              title="Toggle Critical Filter"
+            >
+              Filter Critical
+            </button>
           </div>
 
           {/* Large Stat Numbers */}
@@ -57,13 +76,16 @@ export function PriorityStatStrip() {
                 {stats.totalThreads}
               </span>
               <span className="text-[11px] text-slate-400 font-medium leading-tight max-w-[70px]">
-                Threads triaged
+                Total triaged
               </span>
             </div>
 
             <div className="flex items-baseline gap-2 border-l border-white/10 pl-5">
-              <span className="text-4xl font-extrabold tracking-tight text-white font-sans">
+              <span className="text-4xl font-extrabold tracking-tight text-white font-sans flex items-center gap-1.5">
                 {stats.critical}
+                {stats.critical > 0 && (
+                  <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
+                )}
               </span>
               <span className="text-[11px] text-slate-400 font-medium leading-tight max-w-[75px]">
                 Critical deadlines
@@ -77,28 +99,29 @@ export function PriorityStatStrip() {
           {/* Resolved */}
           <div className="bg-white text-slate-900 rounded-2xl p-3 text-center shadow-xs flex flex-col items-center justify-center">
             <div className="h-5 w-5 rounded-full border border-slate-300 flex items-center justify-center mb-1">
-              <span className="h-2 w-2 rounded-full bg-black" />
+              <CheckCircle2 className="h-3 w-3 text-black" />
             </div>
-            <div className="text-lg font-extrabold tracking-tight">
-              {stats.totalThreads - stats.needsFollowUp}
+            <div className="text-lg font-extrabold tracking-tight font-sans">
+              {Math.max(0, stats.totalThreads - stats.needsFollowUp)}
             </div>
             <div className="text-[10px] font-semibold text-slate-500">
               Resolved
             </div>
           </div>
 
-          {/* In Progress / Follow-Up */}
+          {/* Follow-Up button */}
           <button
             onClick={() => setActiveView("follow-up")}
-            className="bg-white text-slate-900 rounded-2xl p-3 text-center shadow-xs flex flex-col items-center justify-center hover:bg-slate-50 transition-colors"
+            className="bg-white text-slate-900 rounded-2xl p-3 text-center shadow-xs flex flex-col items-center justify-center hover:bg-slate-100 transition-all cursor-pointer"
+            title="View Follow-Up safety net"
           >
-            <div className="h-5 w-5 rounded-full border-2 border-dashed border-slate-400 flex items-center justify-center mb-1">
-              <ClockAlert className="h-2.5 w-2.5 text-slate-900" />
+            <div className="h-5 w-5 rounded-full border-2 border-dashed border-black flex items-center justify-center mb-1">
+              <ClockAlert className="h-2.5 w-2.5 text-black" />
             </div>
-            <div className="text-lg font-extrabold tracking-tight">
+            <div className="text-lg font-extrabold tracking-tight font-sans text-black">
               {stats.needsFollowUp}
             </div>
-            <div className="text-[10px] font-semibold text-slate-500">
+            <div className="text-[10px] font-bold text-black">
               Follow-Up
             </div>
           </button>
@@ -108,7 +131,7 @@ export function PriorityStatStrip() {
             <div className="h-5 w-5 rounded-full border border-slate-300 flex items-center justify-center mb-1">
               <Mail className="h-2.5 w-2.5 text-slate-900" />
             </div>
-            <div className="text-lg font-extrabold tracking-tight">
+            <div className="text-lg font-extrabold tracking-tight font-sans">
               {stats.unread}
             </div>
             <div className="text-[10px] font-semibold text-slate-500">
@@ -118,172 +141,141 @@ export function PriorityStatStrip() {
         </div>
       </div>
 
-      {/* 2. White Card - "Weekly progress & AI Digest" */}
+      {/* 2. White Card - "Action Needed & Urgency Breakdown" */}
       <div className="bg-white text-slate-900 rounded-[32px] p-6 shadow-sm border border-black/[0.04] flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between text-xs mb-3">
-            <span className="font-bold tracking-tight text-sm text-slate-950">
-              Weekly progress
+          <div className="flex items-center justify-between text-xs mb-4">
+            <span className="font-bold tracking-tight text-sm text-slate-950 flex items-center gap-1.5">
+              <AlertCircle className="h-4 w-4 text-black" />
+              Action & Urgency Safety Net
             </span>
-            <span className="bg-black text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
-              +24%
-            </span>
-          </div>
-
-          <div className="flex items-center gap-3 text-[11px] text-slate-500 font-medium mb-3">
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-black" />
-              Student
-            </span>
-            <span className="flex items-center gap-1">
-              <span className="h-2 w-2 rounded-full bg-slate-300" />
-              Exam / Admin
+            <span className="bg-black text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+              {stats.critical + stats.high} Pending Action
             </span>
           </div>
 
-          {/* Smooth SVG wave graph (like the reference image) */}
-          <div className="my-2">
-            <svg
-              viewBox="0 0 300 75"
-              className="w-full h-16 stroke-slate-900 fill-none"
-              strokeWidth="2.2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            >
-              <path
-                d="M 10 48 C 40 48, 60 25, 90 35 C 120 45, 140 18, 170 18 C 200 18, 220 52, 250 30 C 270 16, 285 24, 295 24"
-              />
-              <path
-                d="M 10 60 C 50 60, 70 42, 105 48 C 140 55, 165 40, 195 40 C 230 40, 255 58, 295 50"
-                stroke="#cbd5e1"
-                strokeWidth="1.8"
-              />
-            </svg>
-
-            {/* Days of week axis */}
-            <div className="flex justify-between text-[10px] text-slate-400 font-semibold px-2">
-              <span>M</span>
-              <span>T</span>
-              <span>W</span>
-              <span>T</span>
-              <span>F</span>
-              <span className="bg-black text-white rounded-full h-4 w-4 flex items-center justify-center text-[9px]">
-                S
+          {/* 2 Prominent Metric Badges */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col">
+              <span className="text-xs text-slate-500 font-medium">Critical / High</span>
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-2xl font-extrabold text-slate-950 font-sans">
+                  {stats.critical + stats.high}
+                </span>
+                <span className="text-[10px] font-semibold text-slate-400">threads</span>
+              </div>
+              <span className="text-[10px] text-red-600 font-bold mt-1">
+                {stats.critical} with tight deadline
               </span>
-              <span>S</span>
+            </div>
+
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col">
+              <span className="text-xs text-slate-500 font-medium">Awaiting Reply</span>
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-2xl font-extrabold text-slate-950 font-sans">
+                  {stats.needsFollowUp}
+                </span>
+                <span className="text-[10px] font-semibold text-slate-400">past 48h</span>
+              </div>
+              <span className="text-[10px] text-orange-600 font-bold mt-1">
+                Needs professor reply
+              </span>
             </div>
           </div>
+
+          {/* Quick Filter Pill Buttons */}
+          <div className="flex items-center gap-2 pt-1 flex-wrap text-xs">
+            <button
+              onClick={() => setSelectedUrgency("Critical")}
+              className="px-3 py-1 rounded-full bg-red-50 text-red-700 text-[11px] font-bold hover:bg-red-100 transition-colors cursor-pointer"
+            >
+              ● {stats.critical} Critical
+            </button>
+            <button
+              onClick={() => setSelectedUrgency("High")}
+              className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-[11px] font-bold hover:bg-orange-100 transition-colors cursor-pointer"
+            >
+              ● {stats.high} High
+            </button>
+            <button
+              onClick={() => setSelectedUrgency("All")}
+              className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold hover:bg-slate-200 transition-colors cursor-pointer"
+            >
+              View All
+            </button>
+          </div>
         </div>
 
-        {/* AI Brief Summary */}
-        <div className="mt-3 pt-3 border-t border-slate-100 flex items-start gap-2 text-[11px] text-slate-600 leading-snug">
-          <Sparkles className="h-3.5 w-3.5 text-black shrink-0 mt-0.5" />
-          <p className="line-clamp-2">
-            {digest}
-          </p>
-        </div>
+        {/* Direct Action Link */}
+        <button
+          onClick={() => setActiveView("follow-up")}
+          className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-900 hover:text-slate-600 transition-colors cursor-pointer"
+        >
+          <span>Inspect {stats.needsFollowUp} Overdue Follow-ups</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </button>
       </div>
 
-      {/* 3. White Card - "Month progress & Triage Health" */}
+      {/* 3. White Card - "Academic Core & Noise Elimination" */}
       <div className="bg-white text-slate-900 rounded-[32px] p-6 shadow-sm border border-black/[0.04] flex flex-col justify-between">
         <div>
-          <div className="flex items-center justify-between text-xs mb-1">
-            <span className="font-bold tracking-tight text-sm text-slate-950">
-              Month progress
+          <div className="flex items-center justify-between text-xs mb-4">
+            <span className="font-bold tracking-tight text-sm text-slate-950 flex items-center gap-1.5">
+              <Archive className="h-4 w-4 text-slate-700" />
+              Noise Reduction & Sync
             </span>
-            <TrendingUp className="h-4 w-4 text-slate-400" />
+            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
+              {noisePercent}% Noise Filtered
+            </span>
           </div>
-          <p className="text-[10px] text-slate-400 font-medium mb-4">
-            +20% compared to last month*
+
+          {/* 2 Prominent Metric Badges */}
+          <div className="grid grid-cols-2 gap-3 mb-4">
+            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col">
+              <span className="text-xs text-slate-500 font-medium">Academic Core</span>
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-2xl font-extrabold text-slate-950 font-sans">
+                  {academicThreads.length}
+                </span>
+                <span className="text-[10px] font-semibold text-slate-400">inbox</span>
+              </div>
+              <span className="text-[10px] text-slate-500 font-medium mt-1">
+                Students, exams, admin
+              </span>
+            </div>
+
+            <button
+              onClick={() => setActiveView("other")}
+              className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col text-left hover:bg-slate-100 transition-colors cursor-pointer"
+              title="View filtered newsletters and notices"
+            >
+              <span className="text-xs text-slate-500 font-medium">Filtered Noise</span>
+              <div className="flex items-baseline gap-1.5 mt-1">
+                <span className="text-2xl font-extrabold text-slate-950 font-sans">
+                  {noiseThreads.length}
+                </span>
+                <span className="text-[10px] font-semibold text-slate-400">bulletins</span>
+              </div>
+              <span className="text-[10px] text-slate-600 font-bold mt-1 flex items-center gap-1">
+                Review &apos;Other&apos; →
+              </span>
+            </button>
+          </div>
+
+          <p className="text-[11px] text-slate-500 leading-snug">
+            Campus newsletters, library hours, and IT blasts are safely deprioritized so you focus on student inquiries.
           </p>
-
-          <div className="flex items-center justify-between gap-4 my-1">
-            {/* Legend */}
-            <div className="space-y-1.5 text-xs text-slate-600 font-medium">
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-black" />
-                <span>Re-evaluation</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-slate-500" />
-                <span>Examinations</span>
-              </div>
-              <div className="flex items-center gap-2">
-                <span className="h-2 w-2 rounded-full bg-slate-300" />
-                <span>Committees</span>
-              </div>
-            </div>
-
-            {/* Concentric Progress Gauge */}
-            <div className="relative h-24 w-24 flex items-center justify-center shrink-0">
-              <svg className="h-24 w-24 -rotate-90" viewBox="0 0 100 100">
-                {/* Outer ring background */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="42"
-                  className="stroke-slate-150 fill-none"
-                  strokeWidth="5"
-                />
-                {/* Outer ring active */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="42"
-                  className="stroke-black fill-none"
-                  strokeWidth="5"
-                  strokeDasharray="264"
-                  strokeDashoffset="60"
-                  strokeLinecap="round"
-                />
-                {/* Inner ring background */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="32"
-                  className="stroke-slate-100 fill-none"
-                  strokeWidth="4"
-                />
-                {/* Inner ring active */}
-                <circle
-                  cx="50"
-                  cy="50"
-                  r="32"
-                  className="stroke-slate-400 fill-none"
-                  strokeWidth="4"
-                  strokeDasharray="201"
-                  strokeDashoffset="75"
-                  strokeLinecap="round"
-                />
-              </svg>
-              <div className="absolute text-center">
-                <span className="text-sm font-extrabold tracking-tight text-slate-950 font-sans">
-                  88%
-                </span>
-                <span className="block text-[8px] text-slate-400 uppercase font-bold tracking-wider">
-                  Health
-                </span>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Bottom Actions */}
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-100">
+        <div className="flex items-center gap-2 pt-3 border-t border-slate-100 mt-2">
           <button
             onClick={syncWithBackend}
             disabled={isSyncing}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-3 rounded-full border border-slate-200 text-xs font-semibold text-slate-800 hover:bg-slate-50 transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-4 rounded-full bg-black text-white text-xs font-bold hover:bg-slate-800 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
           >
             <RefreshCw className={`h-3 w-3 ${isSyncing ? "animate-spin" : ""}`} />
-            <span>{isSyncing ? "Syncing..." : "Sync Live Inbox"}</span>
-          </button>
-          <button
-            title="Download Summary Report"
-            onClick={() => alert("Faculty Weekly Triage Report generated and downloaded as PDF.")}
-            className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-600 hover:bg-slate-50 transition-colors shrink-0"
-          >
-            <Download className="h-3.5 w-3.5" />
+            <span>{isSyncing ? "Syncing Inbox..." : "Sync Live Inbox"}</span>
           </button>
         </div>
       </div>

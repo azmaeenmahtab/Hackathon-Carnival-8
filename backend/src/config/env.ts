@@ -15,9 +15,9 @@ const envSchema = z.object({
   BETTER_AUTH_URL: z.string().default("http://localhost:5000"),
   BETTER_AUTH_TRUSTED_ORIGINS: z.string().default("http://localhost:3000"),
 
-  LLM_PROVIDER: z.string().default("anthropic"),
+  LLM_PROVIDER: z.enum(["anthropic", "gemini"]).default("gemini"),
   LLM_API_KEY: z.string().optional().default(""),
-  LLM_MODEL: z.string().default("claude-3-5-sonnet-latest"),
+  LLM_MODEL: z.string().default("gemini-1.5-flash"),
 
   FOLLOWUP_THRESHOLD_HOURS: z.string().default("48").transform((val) => parseInt(val, 10)),
   DIGEST_CACHE_TTL_SECONDS: z.string().default("300").transform((val) => parseInt(val, 10)),

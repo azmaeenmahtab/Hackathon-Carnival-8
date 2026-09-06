@@ -1,45 +1,96 @@
 "use client";
 
 import React from "react";
-import { Sparkles, Clock, ShieldAlert } from "lucide-react";
+import { Sparkles, Clock, ShieldAlert, RefreshCw, Zap } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
 
 export function DailyDigestCard() {
-  const { digest, stats } = useThreads();
+  const { digest, digestGeneratedAt, stats, isBackendConnected, isSyncing, syncWithBackend } =
+    useThreads();
+
+  const formattedTime = digestGeneratedAt
+    ? new Date(digestGeneratedAt).toLocaleTimeString([], {
+        hour: "2-digit",
+        minute: "2-digit",
+      })
+    : null;
 
   return (
-    <div className="relative overflow-hidden rounded-xl border border-indigo-200/80 bg-linear-to-r from-indigo-50/70 via-white to-indigo-50/40 p-5 shadow-xs transition-all dark:border-indigo-900/60 dark:from-indigo-950/30 dark:via-slate-900/50 dark:to-indigo-950/20">
-      {/* Decorative accent element */}
-      <div className="absolute top-0 right-0 -mt-4 -mr-4 h-24 w-24 rounded-full bg-indigo-200/30 blur-xl pointer-events-none dark:bg-indigo-700/10" />
+    <div className="relative overflow-hidden rounded-2xl border border-black/[0.07] bg-white p-5 shadow-sm transition-all">
+      {/* Subtle decorative gradient blob */}
+      <div className="absolute top-0 right-0 -mt-6 -mr-6 h-28 w-28 rounded-full bg-slate-100 blur-2xl pointer-events-none" />
 
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2 max-w-4xl">
-          <div className="flex items-center gap-2">
-            <span className="inline-flex items-center gap-1.5 rounded-full bg-indigo-600 px-2.5 py-0.5 text-xs font-semibold text-white shadow-xs">
-              <Sparkles className="h-3 w-3 animate-pulse" />
-              AI Daily Priority Digest
+        <div className="space-y-2.5 flex-1 max-w-4xl">
+          {/* Header row */}
+          <div className="flex items-center gap-2.5 flex-wrap">
+            <span className="inline-flex items-center gap-1.5 rounded-full bg-black px-2.5 py-0.5 text-[11px] font-bold text-white shadow-xs">
+              <Sparkles className="h-3 w-3" />
+              AI Priority Digest
             </span>
-            <span className="text-[11px] font-medium text-slate-500 flex items-center gap-1 dark:text-slate-400">
-              <Clock className="h-3 w-3" />
-              Generated for Dr. Vance today
-            </span>
+
+            {isBackendConnected ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium text-emerald-600">
+                <Zap className="h-3 w-3" />
+                Gemini Flash
+              </span>
+            ) : (
+              <span className="text-[11px] font-medium text-slate-400">
+                Local mode
+              </span>
+            )}
+
+            {formattedTime && (
+              <span className="text-[11px] font-medium text-slate-400 flex items-center gap-1">
+                <Clock className="h-3 w-3" />
+                Generated at {formattedTime}
+              </span>
+            )}
           </div>
 
-          <p className="text-sm leading-relaxed text-slate-800 font-normal dark:text-slate-200">
-            {digest}
+          {/* Digest text */}
+          <p className="text-sm leading-relaxed text-slate-800 font-normal">
+            {isSyncing ? (
+              <span className="flex items-center gap-2 text-slate-500">
+                <span className="h-3 w-3 rounded-full border border-slate-400 border-t-transparent animate-spin inline-block" />
+                Generating AI digest…
+              </span>
+            ) : (
+              digest
+            )}
           </p>
 
-          <div className="flex flex-wrap items-center gap-2 pt-1 text-xs text-slate-600 dark:text-slate-400">
-            <span className="inline-flex items-center gap-1 font-medium text-rose-600 dark:text-rose-400">
-              <ShieldAlert className="h-3.5 w-3.5" />
-              {stats.critical} Critical item{stats.critical === 1 ? "" : "s"}
-            </span>
-            <span>•</span>
-            <span>{stats.needsFollowUp} awaiting your reply</span>
-            <span>•</span>
-            <span>Grade re-evaluations & ABET accreditation pending</span>
+          {/* Stats footer */}
+          <div className="flex flex-wrap items-center gap-x-3 gap-y-1 pt-0.5 text-xs text-slate-500">
+            {stats.critical > 0 && (
+              <span className="inline-flex items-center gap-1 font-semibold text-red-600">
+                <ShieldAlert className="h-3.5 w-3.5" />
+                {stats.critical} Critical
+              </span>
+            )}
+            {stats.high > 0 && (
+              <span className="font-medium text-orange-600">
+                {stats.high} High
+              </span>
+            )}
+            {stats.needsFollowUp > 0 && (
+              <span>{stats.needsFollowUp} awaiting reply</span>
+            )}
+            {stats.unread > 0 && (
+              <span>{stats.unread} unread</span>
+            )}
           </div>
         </div>
+
+        {/* Re-sync button */}
+        <button
+          onClick={syncWithBackend}
+          disabled={isSyncing}
+          title="Refresh inbox from backend"
+          className="shrink-0 h-9 w-9 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center text-slate-500 hover:bg-black hover:text-white hover:border-black transition-all disabled:opacity-40"
+        >
+          <RefreshCw className={`h-3.5 w-3.5 ${isSyncing ? "animate-spin" : ""}`} />
+        </button>
       </div>
     </div>
   );
