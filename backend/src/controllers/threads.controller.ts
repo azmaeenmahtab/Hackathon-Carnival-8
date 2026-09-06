@@ -140,3 +140,70 @@ export async function getOther(
     next(error);
   }
 }
+
+export async function ingestIncomingEmail(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user!.id;
+    const userObjectId = new (await import("mongoose")).default.Types.ObjectId(userId);
+    const { subject, sender, body, isFaculty = false } = req.body;
+
+    const { classifierService } = await import("../providers/classification/ClassifierService.js");
+    const { Thread } = await import("../models/Thread.js");
+    const { DigestCache } = await import("../models/DigestCache.js");
+
+    const now = new Date();
+    const externalThreadId = `th-inbound-${Date.now()}-${Math.random().toString(36).substring(2, 7)}`;
+
+    const raw = {
+      externalThreadId,
+      subject,
+      participants: [sender],
+      lastMessageAt: now,
+      messages: [
+        {
+          sender,
+          senderIsFaculty: Boolean(isFaculty),
+          sentAt: now,
+          body,
+        },
+      ],
+    };
+
+    // Run AI Classification Pipeline
+    const classification = await classifierService.classifyThread(raw);
+
+    // Save directly to MongoDB Atlas
+    const newThread = await Thread.create({
+      userId: userObjectId,
+      externalThreadId,
+      subject,
+      participants: [sender],
+      messages: raw.messages,
+      messageCount: 1,
+      category: classification.category,
+      urgency: classification.urgency,
+      actionNeeded: classification.actionNeeded,
+      deadline: classification.deadline,
+      aiExplanation: classification.aiExplanation,
+      classificationStatus: classification.status,
+      classificationError: classification.error,
+      isRead: false,
+      needsFollowUp: classification.category !== "Other" && !isFaculty,
+      lastMessageAt: now,
+    });
+
+    // Invalidate DigestCache so the summary instantly incorporates this new email
+    await DigestCache.deleteOne({ userId: userObjectId });
+
+    const formatted = threadService.formatSummary(newThread);
+    logger.info({ threadId: newThread._id, subject, category: classification.category }, "New email triaged and saved to Atlas");
+
+    return sendSuccess(res, formatted, undefined, 201);
+  } catch (error) {
+    next(error);
+  }
+}

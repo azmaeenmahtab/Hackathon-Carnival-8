@@ -131,4 +131,27 @@ export const apiClient = {
       return false;
     }
   },
+
+  async simulateIncomingEmail(data: {
+    subject: string;
+    sender: string;
+    body: string;
+    isFaculty?: boolean;
+  }): Promise<Thread | null> {
+    try {
+      const res = await fetch(`${API_BASE}/api/threads/incoming`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-dev-user-id": "dev-user-1",
+        },
+        body: JSON.stringify(data),
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.success ? json.data : null;
+    } catch {
+      return null;
+    }
+  },
 };

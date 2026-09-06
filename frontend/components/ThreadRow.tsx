@@ -1,20 +1,21 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
+  MoreHorizontal,
+  Bell,
+  CheckCircle2,
+  Circle,
+  Sparkles,
   ClockAlert,
   Calendar,
-  Sparkles,
-  CheckCircle,
-  Circle,
-  MessageSquare,
   Scale,
   Building2,
   Users,
   CalendarDays,
-  AlertCircle,
   FileCheck2,
-  FolderMinus,
+  Archive,
+  AlertCircle,
 } from "lucide-react";
 import { Thread, ThreadUrgency, ThreadCategory } from "@/types/threads";
 import { useThreads } from "@/context/ThreadsContext";
@@ -22,7 +23,7 @@ import { useThreads } from "@/context/ThreadsContext";
 export function formatTimeAgo(isoString: string): string {
   const diffMs = Date.now() - new Date(isoString).getTime();
   const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
-  if (diffHours < 1) return "Just now";
+  if (diffHours < 1) return "Today";
   if (diffHours < 24) return `${diffHours}h ago`;
   const diffDays = Math.floor(diffHours / 24);
   return `${diffDays}d ago`;
@@ -33,20 +34,7 @@ export function formatDeadline(isoString: string): string {
   const month = d.toLocaleDateString("en-US", { month: "short" });
   const day = d.getDate();
   const weekday = d.toLocaleDateString("en-US", { weekday: "short" });
-  return `Due: ${weekday}, ${month} ${day}`;
-}
-
-export function getUrgencyBadge(urgency: ThreadUrgency) {
-  switch (urgency) {
-    case "Critical":
-      return "bg-rose-100 text-rose-800 border-rose-200 dark:bg-rose-950/60 dark:text-rose-300 dark:border-rose-800";
-    case "High":
-      return "bg-amber-100 text-amber-800 border-amber-200 dark:bg-amber-950/60 dark:text-amber-300 dark:border-amber-800";
-    case "Medium":
-      return "bg-blue-100 text-blue-800 border-blue-200 dark:bg-blue-950/60 dark:text-blue-300 dark:border-blue-800";
-    case "Low":
-      return "bg-slate-100 text-slate-700 border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700";
-  }
+  return `${weekday}, ${month} ${day}`;
 }
 
 export function getCategoryIcon(cat: ThreadCategory) {
@@ -64,117 +52,125 @@ export function getCategoryIcon(cat: ThreadCategory) {
     case "Committee/Admin":
       return Building2;
     case "Other":
-      return FolderMinus;
+      return Archive;
   }
 }
 
-export function ThreadRow({ thread }: { thread: Thread }) {
-  const { selectThread, markAsRead } = useThreads();
+export function ThreadCard({ thread }: { thread: Thread }) {
+  const { selectThread, markAsRead, reclassifyThread } = useThreads();
+  const [showMenu, setShowMenu] = useState(false);
+
   const effectiveCategory = thread.correctedCategory ?? thread.category;
   const CategoryIcon = getCategoryIcon(effectiveCategory);
 
   return (
     <div
       onClick={() => selectThread(thread)}
-      className={`group relative rounded-xl border p-4 transition-all cursor-pointer hover:shadow-md ${
-        !thread.isRead
-          ? "border-indigo-200/90 bg-white ring-1 ring-indigo-500/10 dark:border-indigo-900/60 dark:bg-slate-900"
-          : "border-slate-200 bg-white/70 hover:bg-white dark:border-slate-800 dark:bg-slate-900/50 dark:hover:bg-slate-900"
-      }`}
+      className="group relative bg-white rounded-[28px] p-5 border border-black/[0.04] shadow-xs hover:shadow-md transition-all cursor-pointer flex flex-col justify-between min-h-[220px]"
     >
-      <div className="flex items-start justify-between gap-3">
-        {/* Left: Unread dot + Subject + Metadata */}
-        <div className="flex items-start gap-3 min-w-0 flex-1">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              markAsRead(thread.id, !thread.isRead);
-            }}
-            title={thread.isRead ? "Mark unread" : "Mark read"}
-            className="mt-1 text-slate-400 hover:text-indigo-600 transition-colors"
-          >
-            {thread.isRead ? (
-              <CheckCircle className="h-4 w-4 text-slate-300 dark:text-slate-600" />
-            ) : (
-              <Circle className="h-4 w-4 fill-indigo-600 text-indigo-600 animate-pulse" />
-            )}
-          </button>
+      {/* Top row: Icon & 3-dots Menu */}
+      <div>
+        <div className="flex items-start justify-between mb-3">
+          <div className="h-10 w-10 rounded-2xl bg-slate-100 flex items-center justify-center text-slate-900 group-hover:bg-black group-hover:text-white transition-colors">
+            <CategoryIcon className="h-5 w-5" />
+          </div>
 
-          <div className="min-w-0 flex-1 space-y-1.5">
-            {/* Header badges & participants */}
-            <div className="flex flex-wrap items-center gap-2">
-              <span
-                className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold border ${getUrgencyBadge(
-                  thread.urgency
-                )}`}
-              >
-                {thread.urgency}
-              </span>
-
-              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-slate-100 text-slate-700 border border-slate-200/80 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
-                <CategoryIcon className="h-3 w-3 text-slate-500" />
-                {effectiveCategory}
-                {thread.correctedCategory && (
-                  <span className="text-[9px] text-indigo-600 font-bold dark:text-indigo-400">
-                    (Corrected)
-                  </span>
-                )}
-              </span>
-
-              {thread.needsFollowUp && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-rose-50 text-rose-700 border border-rose-200 dark:bg-rose-950/40 dark:text-rose-300 dark:border-rose-800">
-                  <ClockAlert className="h-3 w-3" />
-                  Needs Follow-Up
-                </span>
-              )}
-
-              {thread.deadline && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
-                  <Calendar className="h-3 w-3" />
-                  {formatDeadline(thread.deadline)}
-                </span>
-              )}
-
-              <span className="text-xs text-slate-500 truncate dark:text-slate-400 max-w-[280px]">
-                {thread.participants.join(" • ")}
-              </span>
-            </div>
-
-            {/* Subject */}
-            <h3
-              className={`text-sm tracking-tight text-slate-900 line-clamp-1 dark:text-slate-100 ${
-                !thread.isRead ? "font-bold" : "font-semibold"
-              }`}
+          <div className="relative">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                setShowMenu(!showMenu);
+              }}
+              className="p-1.5 text-slate-400 hover:text-black rounded-lg transition-colors"
             >
-              {thread.subject}
-            </h3>
+              <MoreHorizontal className="h-4 w-4" />
+            </button>
 
-            {/* Core AI Explanation - Visually Prominent */}
-            <div className="flex items-center gap-2 rounded-lg bg-indigo-50/70 px-3 py-1.5 border border-indigo-100 text-xs text-indigo-950 dark:bg-indigo-950/30 dark:border-indigo-900/40 dark:text-indigo-200">
-              <Sparkles className="h-3.5 w-3.5 text-indigo-600 dark:text-indigo-400 shrink-0" />
-              <span className="font-medium italic line-clamp-1">
-                {thread.aiExplanation}
-              </span>
-            </div>
-
-            {/* Last message preview */}
-            <p className="text-xs text-slate-600 line-clamp-1 dark:text-slate-400">
-              {thread.lastMessagePreview}
-            </p>
+            {showMenu && (
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="absolute right-0 top-7 w-36 bg-[#18181b] text-white rounded-2xl p-1.5 shadow-xl z-20 text-xs font-semibold space-y-0.5 animate-in fade-in"
+              >
+                <button
+                  onClick={() => {
+                    markAsRead(thread.id, !thread.isRead);
+                    setShowMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/10 flex items-center justify-between"
+                >
+                  <span>{thread.isRead ? "Mark unread" : "Mark read"}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    reclassifyThread(thread.id, "Committee/Admin");
+                    setShowMenu(false);
+                  }}
+                  className="w-full text-left px-3 py-1.5 rounded-lg hover:bg-white/10"
+                >
+                  Reclassify
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Right: Timestamp & Message Count */}
-        <div className="flex flex-col items-end gap-1.5 shrink-0 pl-2">
-          <span className="text-xs text-slate-500 font-medium dark:text-slate-400">
-            {formatTimeAgo(thread.lastMessageAt)}
-          </span>
-          <span className="inline-flex items-center gap-1 text-[11px] text-slate-400">
-            <MessageSquare className="h-3 w-3" />
-            {thread.messageCount}
+        {/* Subject */}
+        <h4 className="font-bold text-sm text-slate-950 tracking-tight leading-snug line-clamp-2 mb-2">
+          {thread.subject}
+        </h4>
+
+        {/* AI Explanation in Clean Gray Pill Box */}
+        <div className="bg-slate-100/90 rounded-2xl p-2.5 mb-3 text-[11px] text-slate-700 font-medium leading-relaxed italic flex items-start gap-1.5">
+          <Sparkles className="h-3.5 w-3.5 text-black shrink-0 mt-0.5" />
+          <span className="line-clamp-2">{thread.aiExplanation}</span>
+        </div>
+      </div>
+
+      {/* Bottom row: Meta & Black Action Pill */}
+      <div className="flex items-center justify-between pt-2 border-t border-slate-100 text-xs">
+        <div className="space-y-0.5">
+          <div className="flex items-center gap-1.5">
+            <span
+              className={`h-2 w-2 rounded-full ${
+                thread.urgency === "Critical"
+                  ? "bg-black"
+                  : thread.urgency === "High"
+                  ? "bg-slate-600"
+                  : "bg-slate-300"
+              }`}
+            />
+            <span className="font-bold text-[11px] text-slate-900">
+              {effectiveCategory}
+            </span>
+          </div>
+          <span className="text-[10px] text-slate-400 font-medium block">
+            {thread.deadline ? formatDeadline(thread.deadline) : formatTimeAgo(thread.lastMessageAt)}
           </span>
         </div>
+
+        <button
+          onClick={(e) => {
+            e.stopPropagation();
+            markAsRead(thread.id, !thread.isRead);
+          }}
+          className={`h-8 w-8 rounded-full flex items-center justify-center transition-all ${
+            thread.isRead
+              ? "bg-slate-100 text-slate-400 hover:bg-slate-200"
+              : "bg-black text-white hover:bg-slate-800 shadow-xs"
+          }`}
+          title={thread.isRead ? "Mark Unread" : "Mark Read"}
+        >
+          {thread.isRead ? (
+            <CheckCircle2 className="h-3.5 w-3.5" />
+          ) : (
+            <Bell className="h-3.5 w-3.5" />
+          )}
+        </button>
       </div>
     </div>
   );
+}
+
+export function ThreadRow({ thread }: { thread: Thread }) {
+  return <ThreadCard thread={thread} />;
 }

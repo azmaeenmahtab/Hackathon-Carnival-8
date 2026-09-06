@@ -12,23 +12,13 @@ import {
   ChevronDown,
   User,
   GraduationCap,
-  Scale,
-  FileCheck2,
-  AlertCircle,
-  Users,
-  CalendarDays,
-  Building2,
-  FolderMinus,
 } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
 import {
   ThreadCategory,
   THREAD_CATEGORIES,
 } from "@/types/threads";
-import {
-  getUrgencyBadge,
-  formatDeadline,
-} from "./ThreadRow";
+import { formatDeadline } from "./ThreadRow";
 
 export function ThreadDetailDrawer() {
   const {
@@ -51,114 +41,108 @@ export function ThreadDetailDrawer() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-slate-900/40 backdrop-blur-xs transition-opacity animate-in fade-in">
+    <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in select-none">
       <div
-        className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col border-l border-slate-200 overflow-hidden dark:bg-slate-900 dark:border-slate-800 animate-in slide-in-from-right duration-200"
+        className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col border-l border-slate-200 overflow-hidden animate-in slide-in-from-right duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}
-        <div className="p-5 border-b border-slate-200 dark:border-slate-800 space-y-3 shrink-0">
+        <div className="p-6 border-b border-slate-100 space-y-3 shrink-0">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <span
-                className={`inline-flex items-center px-2.5 py-0.5 rounded-md text-xs font-semibold border ${getUrgencyBadge(
-                  selectedThread.urgency
-                )}`}
-              >
+              <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-black text-white shadow-2xs">
                 {selectedThread.urgency} Urgency
               </span>
 
-              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-md text-xs font-medium bg-slate-100 text-slate-700 border border-slate-200 dark:bg-slate-800 dark:text-slate-300 dark:border-slate-700">
+              <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200/80">
                 {effectiveCategory}
                 {selectedThread.correctedCategory && (
-                  <span className="text-[10px] text-indigo-600 font-bold dark:text-indigo-400">
-                    (Manual Override)
+                  <span className="text-[9px] text-slate-500 font-bold ml-1">
+                    (Manual)
                   </span>
                 )}
               </span>
 
               {selectedThread.deadline && (
-                <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-medium bg-amber-50 text-amber-700 border border-amber-200 dark:bg-amber-950/40 dark:text-amber-300 dark:border-amber-800">
-                  <Calendar className="h-3.5 w-3.5" />
+                <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-slate-100 text-slate-800 border border-slate-200/80">
+                  <Calendar className="h-3 w-3 text-slate-500" />
                   {formatDeadline(selectedThread.deadline)}
                 </span>
               )}
             </div>
 
             <div className="flex items-center gap-2">
-              {/* Mark Read Toggle */}
               <button
                 onClick={() => markAsRead(selectedThread.id, !selectedThread.isRead)}
-                className="inline-flex items-center gap-1 text-xs font-medium px-2.5 py-1.5 rounded-md border border-slate-200 hover:bg-slate-50 text-slate-700 dark:border-slate-700 dark:text-slate-300 dark:hover:bg-slate-800 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-800 transition-colors"
               >
                 {selectedThread.isRead ? (
                   <>
-                    <Circle className="h-3.5 w-3.5" />
+                    <Circle className="h-3.5 w-3.5 text-slate-400" />
                     Mark Unread
                   </>
                 ) : (
                   <>
-                    <CheckCircle className="h-3.5 w-3.5 text-emerald-600" />
+                    <CheckCircle className="h-3.5 w-3.5 text-black" />
                     Mark Read
                   </>
                 )}
               </button>
 
-              {/* Close Drawer Button */}
               <button
                 onClick={() => selectThread(null)}
-                className="rounded-lg p-1.5 text-slate-400 hover:text-slate-600 hover:bg-slate-100 dark:hover:bg-slate-800 dark:hover:text-slate-200"
+                className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-black hover:bg-slate-50 transition-colors"
               >
-                <X className="h-5 w-5" />
+                <X className="h-4 w-4" />
               </button>
             </div>
           </div>
 
-          <h2 className="text-lg font-bold tracking-tight text-slate-900 dark:text-slate-100">
+          <h2 className="text-xl font-extrabold tracking-tight text-slate-950 font-sans leading-tight">
             {selectedThread.subject}
           </h2>
 
-          <div className="text-xs text-slate-500 flex flex-wrap items-center gap-1 dark:text-slate-400">
-            <span className="font-semibold text-slate-700 dark:text-slate-300">
-              Participants:
-            </span>
+          <div className="text-xs text-slate-400 font-medium">
+            <span className="font-bold text-slate-600 mr-1">Participants:</span>
             {selectedThread.participants.join(", ")}
           </div>
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-5 space-y-4">
-          {/* AI Explanation Callout */}
-          <div className="rounded-xl border border-indigo-200/90 bg-indigo-50/60 p-4 space-y-1.5 dark:border-indigo-900/50 dark:bg-indigo-950/30">
-            <div className="flex items-center gap-1.5 text-xs font-semibold text-indigo-900 dark:text-indigo-300">
-              <Sparkles className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+          {/* AI Explanation Callout in Clean Card */}
+          <div className="rounded-[24px] border border-black/[0.06] bg-slate-50 p-5 space-y-1.5 shadow-2xs">
+            <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
+              <Sparkles className="h-4 w-4 text-black" />
               AI Priority Reasoning
             </div>
-            <p className="text-sm font-medium text-indigo-950 leading-relaxed dark:text-indigo-100">
+            <p className="text-xs font-semibold text-slate-800 leading-relaxed italic">
               {selectedThread.aiExplanation}
             </p>
           </div>
 
-          {/* Needs Follow-Up Banner */}
+          {/* Follow-Up Alert if pending */}
           {selectedThread.needsFollowUp && (
-            <div className="rounded-xl border border-rose-200 bg-rose-50/70 p-3.5 flex items-start gap-3 dark:border-rose-900 dark:bg-rose-950/40">
-              <ClockAlert className="h-5 w-5 text-rose-600 mt-0.5 shrink-0 dark:text-rose-400" />
-              <div className="text-xs text-rose-900 dark:text-rose-200">
-                <span className="font-bold">Follow-Up Required:</span>{" "}
-                {selectedThread.waitingReason ||
-                  "This thread appears to expect a faculty response and has remained unanswered past the response threshold."}
+            <div className="rounded-[24px] border border-black/10 bg-[#121214] text-white p-4 flex items-start gap-3 shadow-xs">
+              <ClockAlert className="h-5 w-5 text-white mt-0.5 shrink-0" />
+              <div className="text-xs leading-relaxed">
+                <span className="font-bold block text-white mb-0.5">
+                  Action Required:
+                </span>
+                <span className="text-slate-300">
+                  {selectedThread.waitingReason ||
+                    "This inquiry expects a faculty reply and has remained unanswered past the 48-hour threshold."}
+                </span>
               </div>
             </div>
           )}
 
-          {/* Action Bar: Reclassify Category */}
-          <div className="flex items-center justify-between p-3 rounded-lg bg-slate-50 border border-slate-200/70 dark:bg-slate-800/50 dark:border-slate-700">
+          {/* Category Override Bar */}
+          <div className="flex items-center justify-between p-3.5 rounded-2xl bg-slate-50 border border-slate-200/80">
             <div className="flex items-center gap-2">
-              <Tag className="h-4 w-4 text-slate-500" />
-              <span className="text-xs font-semibold text-slate-700 dark:text-slate-300">
-                Category:
-              </span>
-              <span className="text-xs text-slate-600 font-medium dark:text-slate-400">
+              <Tag className="h-4 w-4 text-slate-400" />
+              <span className="text-xs font-bold text-slate-700">Category:</span>
+              <span className="text-xs text-slate-600 font-semibold">
                 {effectiveCategory}
               </span>
             </div>
@@ -166,30 +150,30 @@ export function ThreadDetailDrawer() {
             <div className="relative">
               <button
                 onClick={() => setIsReclassifyOpen(!isReclassifyOpen)}
-                className="flex items-center gap-1.5 text-xs font-medium py-1.5 px-3 rounded-md bg-white border border-slate-300 hover:bg-slate-100 text-slate-700 shadow-2xs dark:bg-slate-700 dark:border-slate-600 dark:text-slate-200"
+                className="flex items-center gap-1.5 text-xs font-bold py-1.5 px-3.5 rounded-full bg-white border border-slate-200 hover:bg-slate-50 text-slate-900 shadow-2xs transition-colors"
               >
                 <span>Reclassify</span>
-                <ChevronDown className="h-3.5 w-3.5 text-slate-400" />
+                <ChevronDown className="h-3 w-3 text-slate-400" />
               </button>
 
               {isReclassifyOpen && (
-                <div className="absolute right-0 mt-1 w-52 rounded-xl bg-white border border-slate-200 shadow-xl py-1 z-30 dark:bg-slate-800 dark:border-slate-700">
-                  <div className="px-3 py-1.5 text-[11px] font-semibold text-slate-400 uppercase tracking-wider">
-                    Select Correct Category
+                <div className="absolute right-0 mt-2 w-52 rounded-2xl bg-white border border-slate-200 shadow-xl py-1.5 z-30">
+                  <div className="px-3.5 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                    Select Category
                   </div>
                   {THREAD_CATEGORIES.map((cat) => (
                     <button
                       key={cat}
                       onClick={() => handleReclassify(cat)}
-                      className={`w-full text-left px-3 py-2 text-xs flex items-center justify-between hover:bg-indigo-50 hover:text-indigo-900 transition-colors dark:hover:bg-slate-700 ${
+                      className={`w-full text-left px-3.5 py-2 text-xs flex items-center justify-between hover:bg-slate-100 transition-colors ${
                         effectiveCategory === cat
-                          ? "font-bold text-indigo-600 dark:text-indigo-400"
-                          : "text-slate-700 dark:text-slate-300"
+                          ? "font-bold text-black bg-slate-50"
+                          : "text-slate-700"
                       }`}
                     >
                       <span>{cat}</span>
                       {effectiveCategory === cat && (
-                        <CheckCircle className="h-3.5 w-3.5" />
+                        <CheckCircle className="h-3.5 w-3.5 text-black" />
                       )}
                     </button>
                   ))}
@@ -198,9 +182,9 @@ export function ThreadDetailDrawer() {
             </div>
           </div>
 
-          {/* Message History Chronology */}
-          <div className="space-y-3 pt-2">
-            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-500 dark:text-slate-400">
+          {/* Message History */}
+          <div className="space-y-3 pt-3">
+            <h4 className="text-xs font-bold uppercase tracking-wider text-slate-400 px-1">
               Message History ({selectedThread.messages?.length || 1})
             </h4>
 
@@ -208,10 +192,10 @@ export function ThreadDetailDrawer() {
               {(selectedThread.messages || []).map((msg, index) => (
                 <div
                   key={index}
-                  className={`rounded-xl border p-4 space-y-2 text-xs transition-all ${
+                  className={`rounded-[24px] p-5 space-y-2 text-xs border ${
                     msg.isFaculty
-                      ? "border-indigo-200 bg-indigo-50/40 ml-4 dark:border-indigo-900 dark:bg-indigo-950/20"
-                      : "border-slate-200 bg-white mr-4 dark:border-slate-800 dark:bg-slate-800/60"
+                      ? "border-black/10 bg-[#18181b] text-white ml-6"
+                      : "border-slate-200 bg-white text-slate-900 mr-6 shadow-2xs"
                   }`}
                 >
                   <div className="flex items-center justify-between">
@@ -219,29 +203,22 @@ export function ThreadDetailDrawer() {
                       <div
                         className={`h-6 w-6 rounded-full flex items-center justify-center text-[10px] font-bold ${
                           msg.isFaculty
-                            ? "bg-indigo-600 text-white"
-                            : "bg-slate-200 text-slate-700 dark:bg-slate-700 dark:text-slate-200"
+                            ? "bg-white text-black"
+                            : "bg-slate-100 text-slate-800"
                         }`}
                       >
                         {msg.isFaculty ? (
-                          <GraduationCap className="h-3.5 w-3.5" />
+                          <GraduationCap className="h-3 w-3" />
                         ) : (
-                          <User className="h-3.5 w-3.5" />
+                          <User className="h-3 w-3" />
                         )}
                       </div>
-                      <div>
-                        <span className="font-semibold text-slate-900 dark:text-slate-100">
-                          {msg.sender}
-                        </span>
-                        {msg.isFaculty && (
-                          <span className="ml-1.5 text-[10px] font-bold text-indigo-600 uppercase tracking-wider dark:text-indigo-400">
-                            (Faculty)
-                          </span>
-                        )}
-                      </div>
+                      <span className="font-bold">
+                        {msg.sender}
+                      </span>
                     </div>
 
-                    <span className="text-[11px] text-slate-400">
+                    <span className={`text-[10px] ${msg.isFaculty ? "text-slate-400" : "text-slate-400"}`}>
                       {new Date(msg.sentAt).toLocaleString("en-US", {
                         month: "short",
                         day: "numeric",
@@ -251,7 +228,7 @@ export function ThreadDetailDrawer() {
                     </span>
                   </div>
 
-                  <p className="text-slate-800 leading-relaxed dark:text-slate-200 whitespace-pre-wrap">
+                  <p className={`leading-relaxed whitespace-pre-wrap font-sans ${msg.isFaculty ? "text-slate-200" : "text-slate-700"}`}>
                     {msg.body}
                   </p>
                 </div>

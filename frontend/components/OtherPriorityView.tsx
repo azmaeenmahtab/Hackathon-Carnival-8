@@ -1,9 +1,9 @@
 "use client";
 
 import React from "react";
-import { Archive, ShieldCheck, Filter } from "lucide-react";
+import { Archive } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
-import { ThreadRow } from "./ThreadRow";
+import { ThreadCard } from "./ThreadRow";
 
 export function OtherPriorityView() {
   const { threads } = useThreads();
@@ -18,31 +18,31 @@ export function OtherPriorityView() {
       : 0;
 
   return (
-    <div className="space-y-4">
-      {/* Filtering value card */}
-      <div className="rounded-xl border border-slate-200 bg-slate-50/80 p-5 dark:border-slate-800 dark:bg-slate-900/60">
-        <div className="flex items-start gap-3">
-          <div className="h-10 w-10 rounded-xl bg-slate-200 text-slate-700 flex items-center justify-center shrink-0 dark:bg-slate-800 dark:text-slate-300">
-            <Archive className="h-5 w-5" />
-          </div>
-          <div>
-            <h2 className="text-base font-bold text-slate-900 tracking-tight dark:text-slate-100 flex items-center gap-2">
-              Filtered Low-Priority & Non-Academic Queue
-              <span className="text-xs px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 font-semibold dark:bg-slate-800 dark:text-slate-300">
-                {otherThreads.length} items ({percent}% of inbox)
-              </span>
+    <div className="space-y-5 select-none">
+      {/* Informative Card */}
+      <div className="bg-white rounded-[32px] p-6 border border-black/[0.04] shadow-xs flex items-start gap-4">
+        <div className="h-10 w-10 rounded-2xl bg-slate-100 text-slate-900 flex items-center justify-center shrink-0">
+          <Archive className="h-5 w-5" />
+        </div>
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <h2 className="text-base font-bold text-slate-950 tracking-tight">
+              Filtered Noise & Campus Bulletins
             </h2>
-            <p className="text-xs text-slate-500 mt-1 leading-relaxed dark:text-slate-400">
-              Campus bulletins, IT advisories, and external calls for papers are automatically triaged here so they don&apos;t crowd out urgent student issues or grading deadlines.
-            </p>
+            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-slate-100 text-slate-700 font-bold">
+              {otherThreads.length} items ({percent}% of inbox)
+            </span>
           </div>
+          <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
+            Campus-wide newsletters, library schedule bulletins, and external calls for papers are automatically triaged here so your primary focus remains on students and examinations.
+          </p>
         </div>
       </div>
 
-      {/* Other Threads */}
-      <div className="space-y-2 opacity-90">
+      {/* Grid of Other Threads */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
         {otherThreads.map((thread) => (
-          <ThreadRow key={thread.id} thread={thread} />
+          <ThreadCard key={thread.id} thread={thread} />
         ))}
       </div>
     </div>

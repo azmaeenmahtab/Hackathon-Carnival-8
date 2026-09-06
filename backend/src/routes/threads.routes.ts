@@ -7,6 +7,7 @@ import {
   reclassify,
   getFollowUp,
   getOther,
+  ingestIncomingEmail,
 } from "../controllers/threads.controller.js";
 import { validate } from "../middleware/validate.js";
 import { THREAD_CATEGORIES } from "../models/Thread.js";
@@ -24,6 +25,18 @@ const reclassifySchema = {
     category: z.enum(THREAD_CATEGORIES),
   }),
 };
+
+const incomingEmailSchema = {
+  body: z.object({
+    subject: z.string().min(1),
+    sender: z.string().min(1),
+    body: z.string().min(1),
+    isFaculty: z.boolean().optional(),
+  }),
+};
+
+// Ingest/simulate incoming email
+router.post("/incoming", validate(incomingEmailSchema), ingestIncomingEmail);
 
 // Specific routes before param :id
 router.get("/follow-up", getFollowUp);
