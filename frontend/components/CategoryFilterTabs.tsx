@@ -37,7 +37,21 @@ export function CategoryFilterTabs() {
             {cat !== "All" && (
               <span
                 className={`h-1.5 w-1.5 rounded-full ${
-                  isSelected ? "bg-white" : "bg-slate-400"
+                  isSelected
+                    ? "bg-white"
+                    : cat === "Re-evaluation"
+                    ? "bg-rose-500"
+                    : cat === "Examination"
+                    ? "bg-amber-500"
+                    : cat === "Student Issue"
+                    ? "bg-purple-500"
+                    : cat === "Meeting"
+                    ? "bg-blue-500"
+                    : cat === "Class/Schedule"
+                    ? "bg-emerald-500"
+                    : cat === "Committee/Admin"
+                    ? "bg-slate-600"
+                    : "bg-zinc-400"
                 }`}
               />
             )}

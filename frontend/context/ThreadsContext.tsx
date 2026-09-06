@@ -46,6 +46,10 @@ interface ThreadsContextType {
   syncWithBackend: () => Promise<void>;
   refreshThreads: () => Promise<void>;
   addThread: (thread: Thread) => void;
+  resolvedThreads: Thread[];
+  resolveThread: (id: string, note?: string) => Promise<void>;
+  restoreResolvedThread: (id: string) => Promise<void>;
+  fetchResolvedThreads: () => Promise<void>;
   showToast: (
     title: string,
     description?: string,
@@ -71,6 +75,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
   const [digestGeneratedAt, setDigestGeneratedAt] = useState<string | null>(null);
 
   const [currentUser, setCurrentUser] = useState<FacultyUser | null>(null);
+  const [resolvedThreads, setResolvedThreads] = useState<Thread[]>([]);
 
   const showToast = useCallback(
     (
@@ -91,12 +96,19 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     setToasts((prev) => prev.filter((t) => t.id !== id));
   };
 
+  const fetchResolvedThreads = useCallback(async () => {
+    const res = await apiClient.getResolvedThreads();
+    if (res && res.items) {
+      setResolvedThreads(res.items);
+    }
+  }, []);
+
   // ── Refresh threads + digest from backend ──────────────────────────────────
   const refreshThreads = useCallback(async () => {
-    const [threadsRes, digestRes, statsFromBackend] = await Promise.all([
+    const [threadsRes, digestRes, resolvedRes] = await Promise.all([
       apiClient.getThreads({ limit: 100, sort: "urgency" }),
       apiClient.getDigest(),
-      apiClient.getStats(),
+      apiClient.getResolvedThreads(),
     ]);
 
     if (threadsRes && threadsRes.items.length > 0) {
@@ -108,9 +120,8 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
       setDigestGeneratedAt(digestRes.generatedAt);
     }
 
-    // Update selected thread from fresh data (so detail drawer stays current)
-    if (statsFromBackend) {
-      // stats are computed live from threads locally via useMemo — no need to store
+    if (resolvedRes && resolvedRes.items) {
+      setResolvedThreads(resolvedRes.items);
     }
   }, []);
 
@@ -271,6 +282,64 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     setThreads((prev) => [thread, ...prev.filter((t) => t.id !== thread.id)]);
   }, []);
 
+  const resolveThread = async (id: string, note?: string) => {
+    const target = threads.find((t) => t.id === id);
+    if (!target) return;
+
+    // Optimistically remove from active threads
+    setThreads((prev) => prev.filter((t) => t.id !== id));
+    if (selectedThread?.id === id) {
+      setSelectedThread(null);
+    }
+
+    const resolvedItem: Thread = {
+      ...target,
+      isRead: true,
+      needsFollowUp: false,
+      resolvedAt: new Date().toISOString(),
+      resolutionNote: note || "Marked resolved by faculty",
+    };
+
+    setResolvedThreads((prev) => [resolvedItem, ...prev]);
+
+    showToast(
+      "Thread Resolved",
+      `"${target.subject.substring(0, 35)}..." moved to resolved collection.`,
+      "success"
+    );
+
+    if (isBackendConnected) {
+      await apiClient.resolveThread(id, note);
+      await refreshThreads();
+    }
+  };
+
+  const restoreResolvedThread = async (id: string) => {
+    const target = resolvedThreads.find((t) => t.id === id);
+    if (!target) return;
+
+    // Optimistically remove from resolved
+    setResolvedThreads((prev) => prev.filter((t) => t.id !== id));
+
+    const restoredItem: Thread = {
+      ...target,
+      resolvedAt: undefined,
+    };
+
+    setThreads((prev) => [restoredItem, ...prev]);
+
+    showToast(
+      "Thread Restored",
+      `Returned to active inbox queue.`,
+      "info"
+    );
+
+    if (isBackendConnected) {
+      await apiClient.restoreResolvedThread(id);
+      await refreshThreads();
+    }
+  };
+
   return (
     <ThreadsContext.Provider
       value={{
@@ -298,6 +367,10 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
         syncWithBackend,
         refreshThreads,
         addThread,
+        resolvedThreads,
+        resolveThread,
+        restoreResolvedThread,
+        fetchResolvedThreads,
         showToast,
       }}
     >

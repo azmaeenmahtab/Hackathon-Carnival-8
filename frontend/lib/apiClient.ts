@@ -204,4 +204,45 @@ export const apiClient = {
       return null;
     }
   },
+
+  async resolveThread(id: string, note?: string): Promise<boolean> {
+    try {
+      const res = await fetch(`${API_BASE}/api/threads/${id}/resolve`, {
+        ...BASE_OPTS,
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ note }),
+      });
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async getResolvedThreads(): Promise<{ items: Thread[]; total: number } | null> {
+    try {
+      const res = await fetch(`${API_BASE}/api/threads/resolved`, BASE_OPTS);
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.success
+        ? { items: json.data, total: json.meta?.total ?? json.data.length }
+        : null;
+    } catch {
+      return null;
+    }
+  },
+
+  async restoreResolvedThread(id: string): Promise<Thread | null> {
+    try {
+      const res = await fetch(`${API_BASE}/api/threads/resolved/${id}/restore`, {
+        ...BASE_OPTS,
+        method: "POST",
+      });
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.success ? json.data : null;
+    } catch {
+      return null;
+    }
+  },
 };

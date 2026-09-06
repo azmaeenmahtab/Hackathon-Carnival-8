@@ -18,6 +18,7 @@ import { useThreads } from "@/context/ThreadsContext";
 export function PriorityStatStrip() {
   const {
     threads,
+    resolvedThreads,
     stats,
     syncWithBackend,
     isSyncing,
@@ -96,18 +97,22 @@ export function PriorityStatStrip() {
 
         {/* 3 White Mini Cards inside the Black Card */}
         <div className="grid grid-cols-3 gap-2.5 pt-2">
-          {/* Resolved */}
-          <div className="bg-white text-slate-900 rounded-2xl p-3 text-center shadow-xs flex flex-col items-center justify-center">
+          {/* Resolved button */}
+          <button
+            onClick={() => setActiveView("resolved")}
+            className="bg-white text-slate-900 rounded-2xl p-3 text-center shadow-xs flex flex-col items-center justify-center hover:bg-slate-100 transition-all cursor-pointer"
+            title="View resolved threads collection"
+          >
             <div className="h-5 w-5 rounded-full border border-slate-300 flex items-center justify-center mb-1">
-              <CheckCircle2 className="h-3 w-3 text-black" />
+              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
             </div>
-            <div className="text-lg font-extrabold tracking-tight font-sans">
-              {Math.max(0, stats.totalThreads - stats.needsFollowUp)}
+            <div className="text-lg font-extrabold tracking-tight font-sans text-emerald-700">
+              {resolvedThreads.length}
             </div>
-            <div className="text-[10px] font-semibold text-slate-500">
+            <div className="text-[10px] font-bold text-slate-700">
               Resolved
             </div>
-          </div>
+          </button>
 
           {/* Follow-Up button */}
           <button

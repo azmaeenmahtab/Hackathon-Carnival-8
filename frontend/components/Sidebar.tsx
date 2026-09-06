@@ -7,6 +7,7 @@ import {
   LayoutDashboard,
   Calendar,
   CheckSquare,
+  CheckCheck,
   BarChart2,
   FileText,
   ClockAlert,
@@ -29,6 +30,10 @@ export function Sidebar() {
     activeView,
     setActiveView,
     stats,
+    threads,
+    resolvedThreads,
+    selectedUrgency,
+    setSelectedUrgency,
     currentUser,
     signOutUser,
   } = useThreads();
@@ -131,43 +136,126 @@ export function Sidebar() {
               <span>Low Priority</span>
             </div>
           </button>
+
+          <button
+            onClick={() => setActiveView("resolved")}
+            className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
+              activeView === "resolved"
+                ? "bg-[#111113] text-white shadow-sm"
+                : "text-slate-600 hover:text-black hover:bg-slate-50"
+            }`}
+          >
+            <div className="flex items-center gap-3">
+              <CheckCheck className="h-4 w-4 text-emerald-500" />
+              <span>Resolved</span>
+            </div>
+            {resolvedThreads.length > 0 && (
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  activeView === "resolved"
+                    ? "bg-emerald-500 text-white"
+                    : "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
+                }`}
+              >
+                {resolvedThreads.length}
+              </span>
+            )}
+          </button>
         </nav>
 
-        {/* Academic Integrations / Workspaces Section */}
-        <div className="mt-8 px-2 space-y-3">
-          <div className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-            Workspaces
+        {/* Priority Filter Section with Faded Tones */}
+        <div className="mt-8 px-2 space-y-2">
+          <div className="flex items-center justify-between text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1">
+            <span>Priority Filter</span>
+            {selectedUrgency !== "All" && (
+              <button
+                onClick={() => setSelectedUrgency("All")}
+                className="text-[10px] text-slate-500 hover:text-black font-semibold lowercase cursor-pointer"
+              >
+                clear
+              </button>
+            )}
           </div>
-          <div className="space-y-2 text-xs font-medium text-slate-600">
-            <div className="flex items-center gap-2.5 px-2 py-1 hover:text-black cursor-pointer">
-              <span className="h-2 w-2 rounded-full bg-slate-900" />
-              <span>CS Dept Portal</span>
-            </div>
-            <div className="flex items-center gap-2.5 px-2 py-1 hover:text-black cursor-pointer">
-              <span className="h-2 w-2 rounded-full bg-slate-400" />
-              <span>Canvas LMS Sync</span>
-            </div>
-            <div className="flex items-center gap-2.5 px-2 py-1 hover:text-black cursor-pointer">
-              <span className="h-2 w-2 rounded-full bg-slate-300" />
-              <span>ABET Audit 2026</span>
-            </div>
-          </div>
-        </div>
+          <div className="space-y-1">
+            {/* Critical */}
+            <button
+              onClick={() =>
+                setSelectedUrgency(selectedUrgency === "Critical" ? "All" : "Critical")
+              }
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                selectedUrgency === "Critical"
+                  ? "bg-rose-50 text-rose-900 ring-1 ring-rose-200"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-black"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-rose-500 shadow-xs" />
+                <span>Critical</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-700 font-bold">
+                {stats.critical}
+              </span>
+            </button>
 
-        {/* Category Tags Section */}
-        <div className="mt-7 px-2 space-y-3">
-          <div className="text-[10px] font-bold tracking-wider text-slate-400 uppercase">
-            Priority Filter
-          </div>
-          <div className="space-y-1.5 text-xs text-slate-600 font-medium">
-            <div className="flex items-center gap-2 px-2 py-1">
-              <span className="h-2 w-2 rounded-full bg-black" />
-              <span>Critical ({stats.critical})</span>
-            </div>
-            <div className="flex items-center gap-2 px-2 py-1">
-              <span className="h-2 w-2 rounded-full bg-slate-400" />
-              <span>High Urgency ({stats.high})</span>
-            </div>
+            {/* High */}
+            <button
+              onClick={() =>
+                setSelectedUrgency(selectedUrgency === "High" ? "All" : "High")
+              }
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                selectedUrgency === "High"
+                  ? "bg-amber-50 text-amber-900 ring-1 ring-amber-200"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-black"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-amber-500" />
+                <span>High Urgency</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 font-bold">
+                {stats.high}
+              </span>
+            </button>
+
+            {/* Medium */}
+            <button
+              onClick={() =>
+                setSelectedUrgency(selectedUrgency === "Medium" ? "All" : "Medium")
+              }
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                selectedUrgency === "Medium"
+                  ? "bg-sky-50 text-sky-900 ring-1 ring-sky-200"
+                  : "text-slate-600 hover:bg-slate-50 hover:text-black"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-sky-400" />
+                <span>Medium</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-700 font-medium">
+                {threads.filter((t) => t.urgency === "Medium").length}
+              </span>
+            </button>
+
+            {/* Low */}
+            <button
+              onClick={() =>
+                setSelectedUrgency(selectedUrgency === "Low" ? "All" : "Low")
+              }
+              className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
+                selectedUrgency === "Low"
+                  ? "bg-slate-100 text-slate-900 ring-1 ring-slate-300"
+                  : "text-slate-500 hover:bg-slate-50 hover:text-black"
+              }`}
+            >
+              <div className="flex items-center gap-2">
+                <span className="h-2 w-2 rounded-full bg-slate-400" />
+                <span>Low / Info</span>
+              </div>
+              <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
+                {threads.filter((t) => t.urgency === "Low").length}
+              </span>
+            </button>
           </div>
         </div>
       </div>

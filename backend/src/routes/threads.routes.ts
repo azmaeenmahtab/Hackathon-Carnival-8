@@ -8,6 +8,9 @@ import {
   getFollowUp,
   getOther,
   ingestIncomingEmail,
+  resolveThread,
+  listResolvedThreads,
+  restoreResolvedThread,
 } from "../controllers/threads.controller.js";
 import { validate } from "../middleware/validate.js";
 import { THREAD_CATEGORIES } from "../models/Thread.js";
@@ -39,6 +42,8 @@ const incomingEmailSchema = {
 router.post("/incoming", validate(incomingEmailSchema), ingestIncomingEmail);
 
 // Specific routes before param :id
+router.get("/resolved", listResolvedThreads);
+router.post("/resolved/:id/restore", restoreResolvedThread);
 router.get("/follow-up", getFollowUp);
 router.get("/other", getOther);
 
@@ -47,5 +52,7 @@ router.get("/", listThreads);
 router.get("/:id", getThreadById);
 router.patch("/:id/read", validate(markReadSchema), markRead);
 router.patch("/:id/reclassify", validate(reclassifySchema), reclassify);
+router.post("/:id/resolve", resolveThread);
+router.patch("/:id/resolve", resolveThread);
 
 export default router;

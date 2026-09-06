@@ -10,6 +10,7 @@ import { ThreadList } from "@/components/ThreadList";
 import { ThreadDetailDrawer } from "@/components/ThreadDetailDrawer";
 import { NeedsFollowUpView } from "@/components/NeedsFollowUpView";
 import { OtherPriorityView } from "@/components/OtherPriorityView";
+import { ResolvedThreadsView } from "@/components/ResolvedThreadsView";
 import { SimulateEmailModal } from "@/components/SimulateEmailModal";
 import { useThreads } from "@/context/ThreadsContext";
 import { authClient } from "@/lib/auth-client";
@@ -161,6 +162,7 @@ export default function Home() {
 
           {activeView === "follow-up" && <NeedsFollowUpView />}
           {activeView === "other" && <OtherPriorityView />}
+          {activeView === "resolved" && <ResolvedThreadsView />}
         </div>
       </main>
 

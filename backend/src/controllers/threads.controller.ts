@@ -207,3 +207,65 @@ export async function ingestIncomingEmail(
     next(error);
   }
 }
+
+export async function resolveThread(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user!.id;
+    const { id } = req.params;
+    const { note } = req.body || {};
+
+    const resolved = await threadService.resolveThread(userId, id, note);
+    if (!resolved) {
+      return sendError(res, "THREAD_NOT_FOUND", "Thread not found or already resolved", 404);
+    }
+
+    return sendSuccess(res, resolved);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function listResolvedThreads(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user!.id;
+    const { page, limit } = req.query;
+
+    const result = await threadService.listResolvedThreads(
+      userId,
+      page ? parseInt(String(page), 10) : 1,
+      limit ? parseInt(String(limit), 10) : 50
+    );
+
+    return sendSuccess(res, result.items, result.meta);
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function restoreResolvedThread(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user!.id;
+    const { id } = req.params;
+
+    const restored = await threadService.restoreResolvedThread(userId, id);
+    if (!restored) {
+      return sendError(res, "THREAD_NOT_FOUND", "Resolved thread not found", 404);
+    }
+
+    return sendSuccess(res, restored);
+  } catch (error) {
+    next(error);
+  }
+}

@@ -41,9 +41,11 @@ export interface Thread {
   waitingHours?: number;
   waitingReason?: string | null;
   correctedCategory: ThreadCategory | null; // If faculty manually reclassified
+  resolvedAt?: string;
+  resolutionNote?: string;
 }
 
-export type ActiveView = "dashboard" | "all" | "follow-up" | "other";
+export type ActiveView = "dashboard" | "all" | "follow-up" | "other" | "resolved";
 
 export interface PriorityStats {
   critical: number;

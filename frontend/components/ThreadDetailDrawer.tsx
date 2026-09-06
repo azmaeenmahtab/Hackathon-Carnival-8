@@ -7,6 +7,7 @@ import {
   ClockAlert,
   Calendar,
   CheckCircle,
+  CheckCheck,
   Circle,
   Tag,
   ChevronDown,
@@ -26,6 +27,7 @@ export function ThreadDetailDrawer() {
     selectThread,
     markAsRead,
     reclassifyThread,
+    resolveThread,
   } = useThreads();
 
   const [isReclassifyOpen, setIsReclassifyOpen] = useState(false);
@@ -73,8 +75,20 @@ export function ThreadDetailDrawer() {
 
             <div className="flex items-center gap-2">
               <button
+                onClick={() => {
+                  resolveThread(selectedThread.id);
+                  selectThread(null);
+                }}
+                className="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100 transition-colors cursor-pointer"
+                title="Mark this thread as resolved and transfer to resolved database collection"
+              >
+                <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
+                Resolve Thread
+              </button>
+
+              <button
                 onClick={() => markAsRead(selectedThread.id, !selectedThread.isRead)}
-                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-800 transition-colors"
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1.5 rounded-full border border-slate-200 hover:bg-slate-50 text-slate-800 transition-colors cursor-pointer"
               >
                 {selectedThread.isRead ? (
                   <>
