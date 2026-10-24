@@ -48,17 +48,49 @@ app.use(globalRateLimiter);
 
 // 5. Database connection middleware (ensures connection in serverless / Vercel execution)
 app.use(async (req, res, next) => {
+  // Fast path: Don't block root status check or health route on database connection
+  if (req.path === "/" || req.path === "/api/health") {
+    return next();
+  }
+
   if (mongoose.connection.readyState !== 1) {
     try {
-      await connectDB();
-    } catch (err) {
-      if (req.path === "/api/health") {
-        return next();
-      }
-      return next(err);
+      // Connect with a 5-second timeout safeguard to prevent Vercel function timeout
+      await Promise.race([
+        connectDB(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("MongoDB connection timeout after 5s")), 5000)
+        ),
+      ]);
+    } catch (err: any) {
+      return sendError(
+        res,
+        "DATABASE_UNAVAILABLE",
+        `Database connection failed: ${err?.message || "Check MONGODB_URI in Vercel environment variables"}`,
+        503
+      );
     }
   }
   next();
+});
+
+// Root welcome / status route
+app.get("/", (_req, res) => {
+  res.json({
+    status: "online",
+    name: "FacultyInbox AI API",
+    version: "1.0.0",
+    db: mongoose.connection.readyState === 1 ? "connected" : "pending_or_disconnected",
+    timestamp: new Date().toISOString(),
+    endpoints: {
+      health: "/api/health",
+      auth: "/api/auth",
+      threads: "/api/threads",
+      digest: "/api/digest",
+      stats: "/api/stats",
+      sync: "/api/sync",
+    },
+  });
 });
 
 // 5. Unauthenticated / System routes
