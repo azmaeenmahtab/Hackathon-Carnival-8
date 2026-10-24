@@ -7,6 +7,9 @@ import { requireAuth } from "./middleware/auth.js";
 import { errorHandler } from "./middleware/errorHandler.js";
 import { sendError } from "./utils/apiResponse.js";
 
+import mongoose from "mongoose";
+import { connectDB } from "./config/db.js";
+
 // Routes
 import authRoutes from "./routes/auth.routes.js";
 import healthRoutes from "./routes/health.routes.js";
@@ -42,6 +45,21 @@ app.use(express.urlencoded({ extended: true }));
 
 // 4. Global light rate limiting
 app.use(globalRateLimiter);
+
+// 5. Database connection middleware (ensures connection in serverless / Vercel execution)
+app.use(async (req, res, next) => {
+  if (mongoose.connection.readyState !== 1) {
+    try {
+      await connectDB();
+    } catch (err) {
+      if (req.path === "/api/health") {
+        return next();
+      }
+      return next(err);
+    }
+  }
+  next();
+});
 
 // 5. Unauthenticated / System routes
 app.use("/api/health", healthRoutes);
