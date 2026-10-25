@@ -276,4 +276,60 @@ export const apiClient = {
       return null;
     }
   },
+
+  async getGoogleConnectUrl(): Promise<string | null> {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/google/connect`, getRequestOptions());
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.success ? json.data.url : null;
+    } catch {
+      return null;
+    }
+  },
+
+  async getGmailStatus(): Promise<{
+    connected: boolean;
+    connectedEmail?: string | null;
+    lastSyncedAt?: string | null;
+    syncStatus?: string;
+  } | null> {
+    try {
+      const res = await fetch(`${API_BASE}/api/auth/google/status`, getRequestOptions());
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.success ? json.data : null;
+    } catch {
+      return null;
+    }
+  },
+
+  async disconnectGmail(): Promise<boolean> {
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/auth/google/disconnect`,
+        getRequestOptions({ method: "POST" })
+      );
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async triggerGmailSync(): Promise<SyncResult | null> {
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/sync/gmail`,
+        getRequestOptions({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        })
+      );
+      if (!res.ok) return null;
+      const json = await res.json();
+      return json.success ? json.data : null;
+    } catch {
+      return null;
+    }
+  },
 };

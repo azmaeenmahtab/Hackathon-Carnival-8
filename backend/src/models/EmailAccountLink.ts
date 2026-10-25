@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Types } from "mongoose";
 export interface IEmailAccountLink extends Document {
   userId: Types.ObjectId;
   provider: "mock" | "gmail";
+  connectedEmail?: string | null;
   gmailAccessTokenEncrypted: string | null;
   gmailRefreshTokenEncrypted: string | null;
   lastSyncedAt: Date | null;
@@ -15,6 +16,7 @@ export const EmailAccountLinkSchema = new Schema<IEmailAccountLink>(
   {
     userId: { type: Schema.Types.ObjectId, ref: "User", required: true, unique: true },
     provider: { type: String, enum: ["mock", "gmail"], default: "mock" },
+    connectedEmail: { type: String, default: null },
     gmailAccessTokenEncrypted: { type: String, default: null },
     gmailRefreshTokenEncrypted: { type: String, default: null },
     lastSyncedAt: { type: Date, default: null },

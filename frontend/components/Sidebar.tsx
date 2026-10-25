@@ -20,8 +20,12 @@ import {
   LogIn,
   Layers,
   Cpu,
+  Mail,
+  RefreshCw,
+  Unlink,
 } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
+import { apiClient } from "@/lib/apiClient";
 import { ActiveView } from "@/types/threads";
 
 export function Sidebar() {
@@ -36,7 +40,73 @@ export function Sidebar() {
     setSelectedUrgency,
     currentUser,
     signOutUser,
+    showToast,
+    refreshThreads,
   } = useThreads();
+
+  const [gmailStatus, setGmailStatus] = React.useState<{
+    connected: boolean;
+    connectedEmail?: string | null;
+    lastSyncedAt?: string | null;
+  } | null>(null);
+  const [isConnectingGmail, setIsConnectingGmail] = React.useState(false);
+  const [isSyncingGmail, setIsSyncingGmail] = React.useState(false);
+
+  React.useEffect(() => {
+    async function loadGmailStatus() {
+      if (currentUser) {
+        const status = await apiClient.getGmailStatus();
+        if (status) {
+          setGmailStatus(status);
+        }
+      }
+    }
+    loadGmailStatus();
+  }, [currentUser]);
+
+  const handleConnectGmail = async () => {
+    setIsConnectingGmail(true);
+    try {
+      const url = await apiClient.getGoogleConnectUrl();
+      if (url) {
+        window.location.href = url;
+      } else {
+        showToast("Error", "Could not start Google OAuth. Check backend credentials.", "warning");
+      }
+    } catch {
+      showToast("Error", "Could not connect to backend OAuth endpoint.", "warning");
+    } finally {
+      setIsConnectingGmail(false);
+    }
+  };
+
+  const handleSyncGmail = async () => {
+    setIsSyncingGmail(true);
+    showToast("Syncing Live Gmail…", "Fetching recent inbox threads and running AI triage.", "info");
+    try {
+      const res = await apiClient.triggerGmailSync();
+      if (res) {
+        showToast("Gmail Sync Complete", `Ingested & classified ${res.ingested} live email threads!`, "success");
+        await refreshThreads();
+        const updatedStatus = await apiClient.getGmailStatus();
+        if (updatedStatus) setGmailStatus(updatedStatus);
+      } else {
+        showToast("Sync Notice", "No new emails found or sync could not complete.", "warning");
+      }
+    } catch {
+      showToast("Sync Failed", "An error occurred during Gmail sync.", "warning");
+    } finally {
+      setIsSyncingGmail(false);
+    }
+  };
+
+  const handleDisconnectGmail = async () => {
+    const ok = confirm("Disconnect linked Gmail account?");
+    if (!ok) return;
+    await apiClient.disconnectGmail();
+    setGmailStatus({ connected: false });
+    showToast("Gmail Disconnected", "Your Google account has been unlinked.", "info");
+  };
 
   const getInitials = (name?: string) => {
     if (!name) return "EV";
@@ -293,6 +363,69 @@ export function Sidebar() {
                 {threads.filter((t) => t.urgency === "Low").length}
               </span>
             </button>
+          </div>
+        </div>
+
+        {/* Live Gmail Integration Box */}
+        <div className="mt-5 px-1">
+          <div className="p-3 rounded-2xl bg-slate-50 border border-slate-200/80 space-y-2">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-1.5">
+                <Mail className="h-3.5 w-3.5 text-red-500" />
+                <span className="text-[11px] font-bold text-slate-900 tracking-tight">Live Gmail</span>
+              </div>
+              {gmailStatus?.connected ? (
+                <span className="inline-flex items-center gap-1 text-[9px] font-bold text-emerald-700 bg-emerald-50 border border-emerald-200/60 px-1.5 py-0.5 rounded-full">
+                  <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                  Active
+                </span>
+              ) : (
+                <span className="text-[9px] font-semibold text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-md">
+                  Not Linked
+                </span>
+              )}
+            </div>
+
+            {gmailStatus?.connected ? (
+              <div className="space-y-2">
+                <p className="text-[10px] text-slate-600 truncate font-mono">
+                  {gmailStatus.connectedEmail || "Connected"}
+                </p>
+
+                <div className="flex items-center gap-1.5">
+                  <button
+                    onClick={handleSyncGmail}
+                    disabled={isSyncingGmail}
+                    className="flex-1 flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-black hover:bg-slate-800 text-white text-[10px] font-bold transition-all disabled:opacity-60 cursor-pointer shadow-2xs"
+                  >
+                    <RefreshCw className={`h-3 w-3 ${isSyncingGmail ? "animate-spin" : ""}`} />
+                    <span>{isSyncingGmail ? "Syncing..." : "Sync Live Inbox"}</span>
+                  </button>
+
+                  <button
+                    onClick={handleDisconnectGmail}
+                    title="Disconnect Gmail"
+                    className="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg hover:bg-rose-50 transition-colors"
+                  >
+                    <Unlink className="h-3 w-3" />
+                  </button>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-1.5">
+                <p className="text-[10px] text-slate-500 leading-tight">
+                  Link your real Gmail to triage actual inbox threads with AI.
+                </p>
+                <button
+                  onClick={handleConnectGmail}
+                  disabled={isConnectingGmail}
+                  className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2.5 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-[10px] font-bold transition-all disabled:opacity-60 cursor-pointer shadow-xs"
+                >
+                  <Mail className="h-3 w-3" />
+                  <span>{isConnectingGmail ? "Connecting…" : "Connect Gmail"}</span>
+                </button>
+              </div>
+            )}
           </div>
         </div>
       </div>

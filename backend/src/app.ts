@@ -17,6 +17,7 @@ import threadsRoutes from "./routes/threads.routes.js";
 import digestRoutes from "./routes/digest.routes.js";
 import statsRoutes from "./routes/stats.routes.js";
 import syncRoutes from "./routes/sync.routes.js";
+import googleAuthRoutes from "./routes/googleAuth.routes.js";
 
 const app = express();
 
@@ -100,6 +101,8 @@ app.get("/", (_req, res) => {
 
 // 5. Unauthenticated / System routes
 app.use("/api/health", healthRoutes);
+app.use("/api/auth/google", googleAuthRoutes);
+app.use("/api/google", googleAuthRoutes);
 app.use("/api/auth", authRoutes);
 
 // 6. Authenticated API routes

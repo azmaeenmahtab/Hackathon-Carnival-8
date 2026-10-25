@@ -22,13 +22,35 @@ import { Bell, Plus } from "lucide-react";
 const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
 export default function Home() {
-  const { activeView, currentUser, stats, threads, setCurrentUser, syncWithBackend } =
+  const { activeView, currentUser, stats, threads, setCurrentUser, syncWithBackend, showToast } =
     useThreads();
   const [isSimulateOpen, setIsSimulateOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
+
+  // ── Handle OAuth Redirect Parameters ──
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      if (params.get("gmail_connected") === "true") {
+        showToast(
+          "Gmail Connected",
+          "Your real Gmail account is now linked. Click 'Sync Live Inbox' in the sidebar to triage live emails!",
+          "success"
+        );
+        window.history.replaceState({}, document.title, window.location.pathname);
+      } else if (params.get("gmail_error")) {
+        showToast(
+          "Gmail Connection Notice",
+          decodeURIComponent(params.get("gmail_error") || "Could not complete Google OAuth connection."),
+          "warning"
+        );
+        window.history.replaceState({}, document.title, window.location.pathname);
+      }
+    }
+  }, [showToast]);
 
   // Count new mails (last 6 h) for the badge dot
   const newMailCount = useMemo(() => {
