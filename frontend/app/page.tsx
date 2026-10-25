@@ -190,13 +190,13 @@ export default function Home() {
           </div>
 
           <div className="flex items-center gap-3">
-            {/* Black Action Pill: "+ Inbound Mail" */}
+            {/* Black Action Pill: Inbound Mail" */}
             <button
               onClick={() => setIsSimulateOpen(true)}
               className="flex items-center gap-2 px-5 py-2.5 rounded-full bg-black hover:bg-slate-800 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
             >
               <Plus className="h-3.5 w-3.5" />
-              <span>+ Inbound Mail</span>
+              <span>Inbound Mail</span>
             </button>
 
             {/* Header Search with Mail and Subject matching */}

@@ -81,7 +81,7 @@ export class DigestService {
     if (allThreads.length === 0) {
       return {
         digestText:
-          "No emails in your inbox yet — connect your Gmail in the sidebar or click '+ Inbound Mail' to begin AI triage.",
+          "No emails in your inbox yet — connect your Gmail in the sidebar or click 'Inbound Mail' to begin AI triage.",
         generatedAt: new Date(),
         stale: false,
         aiGenerated: false,
