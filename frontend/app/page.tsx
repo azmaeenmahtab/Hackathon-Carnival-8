@@ -23,6 +23,8 @@ import {
 } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
 
+const TARGET_ROLES = ["Professors", "Instructors", "Teaching Staff"];
+
 export default function LandingPage() {
   const router = useRouter();
   const { setCurrentUser } = useThreads();
@@ -30,6 +32,20 @@ export default function LandingPage() {
   const [hasSession, setHasSession] = useState(false);
   const [activeTab, setActiveTab] = useState<"urgent" | "summary" | "clean">("urgent");
   const [openFaq, setOpenFaq] = useState<number | null>(0); // First FAQ open by default for immediate clarity
+  const [roleIndex, setRoleIndex] = useState(0);
+  const [isRoleFading, setIsRoleFading] = useState(false);
+
+  // Auto-cycle through target roles one by one
+  useEffect(() => {
+    const roleTimer = setInterval(() => {
+      setIsRoleFading(true);
+      setTimeout(() => {
+        setRoleIndex((prev) => (prev + 1) % TARGET_ROLES.length);
+        setIsRoleFading(false);
+      }, 250);
+    }, 2800);
+    return () => clearInterval(roleTimer);
+  }, []);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -120,21 +136,59 @@ export default function LandingPage() {
 
       {/* ── 2. Hero Section ── */}
       <section className="pt-16 pb-12 sm:pt-20 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
-        {/* Subtle pill tag with gentle float */}
-        <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white border border-black/[0.08] shadow-2xs text-[11px] font-bold text-slate-800 animate-float-gentle">
-          <span className="h-2 w-2 rounded-full bg-black animate-pulse" />
-          <span>Made for university professors, instructors, and teaching staff</span>
+        {/* Dynamic One-by-One Role Banner (Replaces static floating pill) */}
+        <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-black/[0.08] shadow-2xs text-xs font-semibold text-slate-700">
+          <span className="flex h-2 w-2 relative">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
+          </span>
+          <span className="text-slate-500">Built specifically for</span>
+          <div className="h-5 overflow-hidden inline-flex items-center">
+            <span
+              className={`font-extrabold text-slate-950 inline-block transition-all duration-300 transform min-w-[110px] text-left ${
+                isRoleFading
+                  ? "-translate-y-3 opacity-0"
+                  : "translate-y-0 opacity-100"
+              }`}
+            >
+              {TARGET_ROLES[roleIndex]}
+            </span>
+          </div>
         </div>
 
-        {/* Main Headline */}
+        {/* Main Headline (Preserved exactly as user requested) */}
         <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.14] max-w-3xl mx-auto animate-fade-in-up">
           Spend less time sorting emails. Spend more time teaching.
         </h1>
 
-        {/* Subtitle - In Plain, Friendly Words */}
+        {/* Subtitle - In Plain, Friendly Words (Preserved exactly) */}
         <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
           MailMind highlights urgent student questions and exam deadlines first, while putting campus newsletters and routine announcements quietly in the background.
         </p>
+
+        {/* Role Pill Indicators - Shows roles one by one with live active indicator */}
+        <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
+          <span className="text-xs font-semibold text-slate-400 mr-0.5">Focusing on:</span>
+          {TARGET_ROLES.map((role, idx) => (
+            <button
+              key={role}
+              onClick={() => {
+                setIsRoleFading(true);
+                setTimeout(() => {
+                  setRoleIndex(idx);
+                  setIsRoleFading(false);
+                }, 150);
+              }}
+              className={`px-3.5 py-1 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer ${
+                roleIndex === idx
+                  ? "bg-black text-white shadow-xs scale-105"
+                  : "bg-white/80 text-slate-600 hover:text-black hover:bg-white border border-black/[0.06]"
+              }`}
+            >
+              {role}
+            </button>
+          ))}
+        </div>
 
         {/* Action CTAs */}
         <div className="flex flex-col sm:flex-row items-center justify-center gap-3.5 pt-3">
