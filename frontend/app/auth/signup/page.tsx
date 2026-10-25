@@ -11,8 +11,6 @@ import {
   AlertCircle,
   Eye,
   EyeOff,
-  Sparkles,
-  CheckCircle2,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useThreads } from "@/context/ThreadsContext";
@@ -102,24 +100,20 @@ export default function SignUpPage() {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 space-y-6">
-      {/* Title Header */}
-      <div className="space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300">
-          <Sparkles className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
-          <span>New Faculty Onboarding</span>
-        </div>
-        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+    <div className="bg-white rounded-[28px] p-7 sm:p-9 shadow-sm border border-black/[0.06] space-y-6">
+      {/* Title Header (Clean, direct, no tag pills) */}
+      <div className="space-y-1.5">
+        <h2 className="text-2xl font-extrabold text-slate-950 tracking-tight">
           Create Faculty Account
         </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Register your university profile to automate academic email priority and response queues.
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Register your university profile to automate academic email priority triage.
         </p>
       </div>
 
       {/* Error Alert */}
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-xs text-rose-800 flex items-start gap-3 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 animate-in fade-in duration-200">
+        <div className="p-3.5 rounded-xl bg-slate-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5 animate-in fade-in duration-200">
           <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
           <span className="leading-relaxed">{errorMessage}</span>
         </div>
@@ -129,7 +123,7 @@ export default function SignUpPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Full Name */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold text-slate-800 mb-1.5">
             Faculty Full Name
           </label>
           <div className="relative">
@@ -140,14 +134,14 @@ export default function SignUpPage() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="Dr. Eleanor Vance"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-white/10 dark:focus:border-white"
+              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
           </div>
         </div>
 
         {/* Department / Division */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold text-slate-800 mb-1.5">
             Department / Faculty Division
           </label>
           <div className="relative">
@@ -157,14 +151,14 @@ export default function SignUpPage() {
               value={department}
               onChange={(e) => setDepartment(e.target.value)}
               placeholder="Department of Computer Science"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-white/10 dark:focus:border-white"
+              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
           </div>
         </div>
 
         {/* University Email */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold text-slate-800 mb-1.5">
             University Email Address
           </label>
           <div className="relative">
@@ -175,14 +169,14 @@ export default function SignUpPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="evance@university.edu"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-white/10 dark:focus:border-white"
+              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
           </div>
         </div>
 
         {/* Password */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold text-slate-800 mb-1.5">
             Password (min. 8 characters)
           </label>
           <div className="relative">
@@ -194,12 +188,12 @@ export default function SignUpPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-white/10 dark:focus:border-white"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -208,7 +202,7 @@ export default function SignUpPage() {
 
         {/* Confirm Password */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold text-slate-800 mb-1.5">
             Confirm Password
           </label>
           <div className="relative">
@@ -220,11 +214,11 @@ export default function SignUpPage() {
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-white/10 dark:focus:border-white"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
           </div>
           {confirmPassword && password !== confirmPassword && (
-            <p className="text-[11px] text-rose-500 mt-1 font-medium">
+            <p className="text-[11px] text-rose-600 mt-1 font-medium">
               Passwords do not match.
             </p>
           )}
@@ -234,7 +228,7 @@ export default function SignUpPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-slate-800 shadow-md shadow-slate-900/10 transition-all disabled:opacity-60 cursor-pointer pt-2"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-slate-850 shadow-xs transition-all disabled:opacity-60 cursor-pointer pt-2"
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
@@ -251,12 +245,12 @@ export default function SignUpPage() {
       </form>
 
       {/* Navigation to Sign In */}
-      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 text-center">
-        <p className="text-xs text-slate-500 dark:text-slate-400">
+      <div className="pt-2 border-t border-slate-100 text-center">
+        <p className="text-xs text-slate-500">
           Already have a faculty account?{" "}
           <Link
             href="/auth/login"
-            className="font-bold text-slate-900 hover:underline dark:text-white"
+            className="font-bold text-slate-950 hover:underline"
           >
             Sign In
           </Link>

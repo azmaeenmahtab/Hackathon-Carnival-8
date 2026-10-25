@@ -6,11 +6,10 @@ import {
   Lock,
   Mail,
   ArrowRight,
-  ShieldCheck,
   AlertCircle,
   Eye,
   EyeOff,
-  Sparkles,
+  KeyRound,
 } from "lucide-react";
 import { authClient } from "@/lib/auth-client";
 import { useThreads } from "@/context/ThreadsContext";
@@ -87,24 +86,20 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-white dark:bg-slate-900 rounded-3xl p-8 sm:p-10 shadow-xl shadow-slate-200/50 dark:shadow-none border border-slate-200/80 dark:border-slate-800 space-y-6">
-      {/* Title Header */}
-      <div className="space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full bg-slate-100 dark:bg-slate-800 text-[11px] font-bold text-slate-700 dark:text-slate-300">
-          <Sparkles className="h-3 w-3 text-indigo-600 dark:text-indigo-400" />
-          <span>Faculty Portal</span>
-        </div>
-        <h2 className="text-2xl font-extrabold text-slate-900 dark:text-white tracking-tight">
+    <div className="bg-white rounded-[28px] p-7 sm:p-9 shadow-sm border border-black/[0.06] space-y-6">
+      {/* Title Header (Clean, direct, no tag pills) */}
+      <div className="space-y-1.5">
+        <h2 className="text-2xl font-extrabold text-slate-950 tracking-tight">
           Faculty Sign In
         </h2>
-        <p className="text-xs text-slate-500 dark:text-slate-400 leading-relaxed">
-          Enter your university credentials to access your priority triage queue and AI daily briefing.
+        <p className="text-xs text-slate-500 leading-relaxed">
+          Enter your university email to access your priority triage queue and daily briefing.
         </p>
       </div>
 
       {/* Error Alert */}
       {errorMessage && (
-        <div className="p-4 rounded-2xl bg-rose-50 border border-rose-200/80 text-xs text-rose-800 flex items-start gap-3 dark:bg-rose-950/40 dark:border-rose-900 dark:text-rose-300 animate-in fade-in duration-200">
+        <div className="p-3.5 rounded-xl bg-slate-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5 animate-in fade-in duration-200">
           <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
           <span className="leading-relaxed">{errorMessage}</span>
         </div>
@@ -114,7 +109,7 @@ export default function LoginPage() {
       <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email Field */}
         <div>
-          <label className="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1.5">
+          <label className="block text-xs font-bold text-slate-800 mb-1.5">
             University Email Address
           </label>
           <div className="relative">
@@ -125,7 +120,7 @@ export default function LoginPage() {
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="evance@university.edu"
-              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-white/10 dark:focus:border-white"
+              className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
           </div>
         </div>
@@ -133,10 +128,10 @@ export default function LoginPage() {
         {/* Password Field */}
         <div>
           <div className="flex items-center justify-between mb-1.5">
-            <label className="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            <label className="block text-xs font-bold text-slate-800">
               Password
             </label>
-            <span className="text-[11px] text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors cursor-pointer">
+            <span className="text-[11px] text-slate-400 hover:text-slate-700 transition-colors cursor-pointer">
               Forgot password?
             </span>
           </div>
@@ -149,12 +144,12 @@ export default function LoginPage() {
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               placeholder="••••••••"
-              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-black/10 focus:border-black transition-all dark:border-slate-800 dark:bg-slate-950 dark:text-slate-100 dark:focus:ring-white/10 dark:focus:border-white"
+              className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
             <button
               type="button"
               onClick={() => setShowPassword(!showPassword)}
-              className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors"
+              className="absolute right-3.5 top-3 text-slate-400 hover:text-slate-700 transition-colors cursor-pointer"
             >
               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
             </button>
@@ -162,16 +157,16 @@ export default function LoginPage() {
         </div>
 
         {/* Remember Me */}
-        <div className="flex items-center gap-2 pt-1">
+        <div className="flex items-center gap-2 pt-0.5">
           <input
             id="remember-me"
             type="checkbox"
             checked={rememberMe}
             onChange={(e) => setRememberMe(e.target.checked)}
-            className="h-4 w-4 rounded border-slate-300 text-black focus:ring-black/20 dark:border-slate-700 dark:bg-slate-900"
+            className="h-4 w-4 rounded border-slate-300 text-black focus:ring-black cursor-pointer"
           />
-          <label htmlFor="remember-me" className="text-xs text-slate-600 dark:text-slate-400 select-none cursor-pointer">
-            Remember this session on this device
+          <label htmlFor="remember-me" className="text-xs text-slate-600 select-none cursor-pointer">
+            Remember this session
           </label>
         </div>
 
@@ -179,7 +174,7 @@ export default function LoginPage() {
         <button
           type="submit"
           disabled={isLoading}
-          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-slate-800 shadow-md shadow-slate-900/10 transition-all disabled:opacity-60 cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-xs font-bold text-white bg-black hover:bg-slate-850 shadow-xs transition-all disabled:opacity-60 cursor-pointer"
         >
           {isLoading ? (
             <div className="flex items-center gap-2">
@@ -196,22 +191,22 @@ export default function LoginPage() {
       </form>
 
       {/* Demo Credentials Quick Fill */}
-      <div className="pt-2 border-t border-slate-100 dark:border-slate-800 space-y-3">
+      <div className="pt-2 border-t border-slate-100 space-y-3">
         <button
           type="button"
           onClick={handleFillDemo}
-          className="w-full flex items-center justify-center gap-2 py-2 px-3 rounded-xl border border-dashed border-slate-300 hover:border-black bg-slate-50 hover:bg-white text-slate-700 text-xs font-bold transition-all dark:border-slate-700 dark:bg-slate-850 dark:text-slate-300 cursor-pointer"
+          className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl border border-dashed border-slate-300 hover:border-black bg-slate-50 hover:bg-white text-slate-800 text-xs font-bold transition-all cursor-pointer"
         >
-          <ShieldCheck className="h-4 w-4 text-indigo-600 dark:text-indigo-400" />
+          <KeyRound className="h-3.5 w-3.5 text-slate-700" />
           <span>Fill Verified Demo Credentials</span>
         </button>
 
         {/* Navigation to Signup */}
-        <p className="text-xs text-center text-slate-500 dark:text-slate-400">
+        <p className="text-xs text-center text-slate-500">
           New faculty member?{" "}
           <Link
             href="/auth/signup"
-            className="font-bold text-slate-900 hover:underline dark:text-white"
+            className="font-bold text-slate-950 hover:underline"
           >
             Create an Account
           </Link>
