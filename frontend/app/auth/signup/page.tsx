@@ -33,7 +33,7 @@ export default function SignUpPage() {
       const storedToken = localStorage.getItem("faculty_session_token");
       const storedUser = localStorage.getItem("faculty_user");
       if (storedToken && storedUser) {
-        window.location.href = "/";
+        window.location.href = "/dashboard";
       }
     }
   }, []);
@@ -112,7 +112,7 @@ export default function SignUpPage() {
           });
         }
 
-        window.location.href = "/";
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       setErrorMessage(err?.message || "An unexpected error occurred during registration. Please try again.");

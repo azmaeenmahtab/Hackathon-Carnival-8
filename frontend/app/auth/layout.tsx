@@ -31,7 +31,7 @@ export default function AuthLayout({
           className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-600 hover:text-black transition-colors"
         >
           <ArrowLeft className="h-3.5 w-3.5" />
-          <span>Back to Dashboard</span>
+          <span>Back to Home</span>
         </Link>
       </header>
 

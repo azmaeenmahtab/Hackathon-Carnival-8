@@ -30,7 +30,7 @@ export default function LoginPage() {
       const storedToken = localStorage.getItem("faculty_session_token");
       const storedUser = localStorage.getItem("faculty_user");
       if (storedToken && storedUser) {
-        window.location.href = "/";
+        window.location.href = "/dashboard";
       }
     }
   }, []);
@@ -93,7 +93,7 @@ export default function LoginPage() {
           });
         }
 
-        window.location.href = "/";
+        window.location.href = "/dashboard";
       }
     } catch (err: any) {
       setErrorMessage(err?.message || "An unexpected connection error occurred. Please try again.");
