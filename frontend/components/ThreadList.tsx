@@ -92,7 +92,7 @@ export function ThreadList({ onOpenSimulate }: { onOpenSimulate?: () => void }) 
     <div className="space-y-8 select-none">
       {/* ── Search Bar ────────────────────────────────────────────────── */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-        <div className="relative flex-1 max-w-md">
+        <div className="relative flex-1 max-w-md w-full">
           <Search className="absolute left-3.5 top-2.5 h-4 w-4 text-slate-400" />
           <input
             type="text"
@@ -112,7 +112,7 @@ export function ThreadList({ onOpenSimulate }: { onOpenSimulate?: () => void }) 
           )}
         </div>
 
-        <div className="text-xs font-semibold text-slate-500">
+        <div className="text-xs font-semibold text-slate-500 self-start sm:self-center">
           Showing{" "}
           <span className="font-bold text-slate-950">{filteredThreads.length}</span>{" "}
           active items

@@ -43,15 +43,18 @@ export function ThreadDetailDrawer() {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in select-none">
+    <div
+      className="fixed inset-0 z-50 flex justify-end bg-black/40 backdrop-blur-xs transition-opacity animate-in fade-in select-none"
+      onClick={() => selectThread(null)}
+    >
       <div
         className="w-full max-w-2xl h-full bg-white shadow-2xl flex flex-col border-l border-slate-200 overflow-hidden animate-in slide-in-from-right duration-200"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Drawer Header */}
-        <div className="p-6 border-b border-slate-100 space-y-3 shrink-0">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-2">
+        <div className="p-4 sm:p-6 border-b border-slate-100 space-y-3 shrink-0">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+            <div className="flex items-center gap-2 flex-wrap">
               <span className="inline-flex items-center px-3 py-1 rounded-full text-xs font-bold bg-black text-white shadow-2xs">
                 {selectedThread.urgency} Urgency
               </span>
@@ -73,17 +76,17 @@ export function ThreadDetailDrawer() {
               )}
             </div>
 
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 shrink-0 flex-wrap justify-end">
               <button
                 onClick={() => {
                   resolveThread(selectedThread.id);
                   selectThread(null);
                 }}
-                className="inline-flex items-center gap-1.5 text-xs font-bold px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100 transition-colors cursor-pointer"
+                className="inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-300 hover:bg-emerald-100 transition-colors cursor-pointer"
                 title="Mark this thread as resolved and transfer to resolved database collection"
               >
                 <CheckCheck className="h-3.5 w-3.5 text-emerald-600" />
-                Resolve Thread
+                <span>Resolve</span>
               </button>
 
               <button
@@ -93,19 +96,20 @@ export function ThreadDetailDrawer() {
                 {selectedThread.isRead ? (
                   <>
                     <Circle className="h-3.5 w-3.5 text-slate-400" />
-                    Mark Unread
+                    <span>Unread</span>
                   </>
                 ) : (
                   <>
                     <CheckCircle className="h-3.5 w-3.5 text-black" />
-                    Mark Read
+                    <span>Read</span>
                   </>
                 )}
               </button>
 
               <button
                 onClick={() => selectThread(null)}
-                className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-black hover:bg-slate-50 transition-colors"
+                className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-black hover:bg-slate-50 transition-colors cursor-pointer"
+                aria-label="Close details"
               >
                 <X className="h-4 w-4" />
               </button>
@@ -123,7 +127,7 @@ export function ThreadDetailDrawer() {
         </div>
 
         {/* Scrollable Content */}
-        <div className="flex-1 overflow-y-auto p-6 space-y-4">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6 space-y-4">
           {/* AI Explanation Callout in Clean Card */}
           <div className="rounded-[24px] border border-black/[0.06] bg-slate-50 p-5 space-y-1.5 shadow-2xs">
             <div className="flex items-center gap-1.5 text-xs font-bold text-slate-900">
@@ -206,10 +210,10 @@ export function ThreadDetailDrawer() {
               {(selectedThread.messages || []).map((msg, index) => (
                 <div
                   key={index}
-                  className={`rounded-[24px] p-5 space-y-2 text-xs border ${
+                  className={`rounded-[24px] p-4 sm:p-5 space-y-2 text-xs border ${
                     msg.isFaculty
-                      ? "border-black/10 bg-[#18181b] text-white ml-6"
-                      : "border-slate-200 bg-white text-slate-900 mr-6 shadow-2xs"
+                      ? "border-black/10 bg-[#18181b] text-white ml-2 sm:ml-6"
+                      : "border-slate-200 bg-white text-slate-900 mr-2 sm:mr-6 shadow-2xs"
                   }`}
                 >
                   <div className="flex items-center justify-between">

@@ -24,12 +24,18 @@ import {
   RefreshCw,
   Unlink,
   Trash2,
+  X,
 } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
 import { apiClient } from "@/lib/apiClient";
 import { ActiveView } from "@/types/threads";
 
-export function Sidebar() {
+interface SidebarProps {
+  onClose?: () => void;
+  isMobile?: boolean;
+}
+
+export function Sidebar({ onClose, isMobile }: SidebarProps = {}) {
   const router = useRouter();
   const pathname = usePathname();
   const {
@@ -120,30 +126,57 @@ export function Sidebar() {
     return name.slice(0, 2).toUpperCase();
   };
 
+  const handleNav = () => {
+    if (onClose) onClose();
+  };
+
   const handleSignOut = async () => {
+    if (onClose) onClose();
     await signOutUser();
     router.push("/auth/login");
   };
 
+  const Container = isMobile ? "div" : "aside";
+  const containerClasses = isMobile
+    ? "w-full h-full bg-white rounded-[28px] p-5 shadow-xl border border-black/[0.06] flex flex-col justify-between overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] select-none"
+    : "hidden lg:flex w-60 bg-white rounded-[32px] p-5 shadow-sm border border-black/[0.04] flex flex-col justify-between shrink-0 m-4 select-none sticky top-4 self-start h-[calc(100vh-2rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] z-30";
+
   return (
-    <aside className="w-60 bg-white rounded-[32px] p-5 shadow-sm border border-black/[0.04] flex flex-col justify-between shrink-0 m-4 select-none sticky top-4 self-start h-[calc(100vh-2rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] z-30">
+    <Container className={containerClasses}>
       <div>
-        {/* Brand Logo - iDraft style */}
-        <Link href="/dashboard" className="flex items-center gap-2.5 px-2 py-3 mb-6 group">
-          <div className="h-8 w-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
-            <GraduationCap className="h-4 w-4" />
-          </div>
-          <div className="flex items-center gap-1.5">
-            <span className="font-bold text-slate-950 tracking-tight text-lg font-sans">
-              MailMind
-            </span>
-          </div>
-        </Link>
+        {/* Brand Logo & Mobile Close */}
+        <div className="flex items-center justify-between mb-6 px-1">
+          <Link
+            href="/dashboard"
+            onClick={handleNav}
+            className="flex items-center gap-2.5 group"
+          >
+            <div className="h-8 w-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
+              <GraduationCap className="h-4 w-4" />
+            </div>
+            <div className="flex items-center gap-1.5">
+              <span className="font-bold text-slate-950 tracking-tight text-lg font-sans">
+                MailMind
+              </span>
+            </div>
+          </Link>
+
+          {isMobile && (
+            <button
+              onClick={onClose}
+              className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-black hover:bg-slate-50 transition-colors cursor-pointer"
+              aria-label="Close navigation"
+            >
+              <X className="h-4 w-4" />
+            </button>
+          )}
+        </div>
 
         {/* Main Navigation - Black Pill for Active Item */}
         <nav className="space-y-1">
           <Link
             href="/dashboard"
+            onClick={handleNav}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
               pathname === "/dashboard"
                 ? "bg-[#111113] text-white shadow-sm"
@@ -158,6 +191,7 @@ export function Sidebar() {
 
           <Link
             href="/dashboard/all"
+            onClick={handleNav}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
               pathname === "/dashboard/all"
                 ? "bg-[#111113] text-white shadow-sm"
@@ -181,6 +215,7 @@ export function Sidebar() {
 
           <Link
             href="/dashboard/follow-up"
+            onClick={handleNav}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
               pathname === "/dashboard/follow-up"
                 ? "bg-[#111113] text-white shadow-sm"
@@ -206,6 +241,7 @@ export function Sidebar() {
 
           <Link
             href="/dashboard/priority/low"
+            onClick={handleNav}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
               pathname === "/dashboard/priority/low"
                 ? "bg-[#111113] text-white shadow-sm"
@@ -220,6 +256,7 @@ export function Sidebar() {
 
           <Link
             href="/dashboard/resolved"
+            onClick={handleNav}
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
               pathname === "/dashboard/resolved"
                 ? "bg-[#111113] text-white shadow-sm"
@@ -251,6 +288,7 @@ export function Sidebar() {
             {pathname.startsWith("/dashboard/priority") && (
               <Link
                 href="/dashboard"
+                onClick={handleNav}
                 className="text-[10px] text-slate-500 hover:text-black font-semibold lowercase cursor-pointer"
               >
                 dashboard
@@ -261,6 +299,7 @@ export function Sidebar() {
             {/* Critical */}
             <Link
               href="/dashboard/priority/critical"
+              onClick={handleNav}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 pathname === "/dashboard/priority/critical"
                   ? "bg-rose-50 text-rose-900 ring-1 ring-rose-300 font-bold"
@@ -279,6 +318,7 @@ export function Sidebar() {
             {/* High */}
             <Link
               href="/dashboard/priority/high"
+              onClick={handleNav}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 pathname === "/dashboard/priority/high"
                   ? "bg-amber-50 text-amber-900 ring-1 ring-amber-300 font-bold"
@@ -297,6 +337,7 @@ export function Sidebar() {
             {/* Medium */}
             <Link
               href="/dashboard/priority/medium"
+              onClick={handleNav}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 pathname === "/dashboard/priority/medium"
                   ? "bg-sky-50 text-sky-900 ring-1 ring-sky-300 font-bold"
@@ -315,6 +356,7 @@ export function Sidebar() {
             {/* Low */}
             <Link
               href="/dashboard/priority/low"
+              onClick={handleNav}
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
                 pathname === "/dashboard/priority/low"
                   ? "bg-slate-100 text-slate-900 ring-1 ring-slate-300 font-bold"
@@ -427,7 +469,7 @@ export function Sidebar() {
             <button
               onClick={handleSignOut}
               title="Sign Out"
-              className="p-1.5 text-slate-400 hover:text-black rounded-lg transition-colors"
+              className="p-1.5 text-slate-400 hover:text-black rounded-lg transition-colors cursor-pointer"
             >
               <LogOut className="h-3.5 w-3.5" />
             </button>
@@ -435,6 +477,7 @@ export function Sidebar() {
         ) : (
           <Link
             href="/auth/login"
+            onClick={handleNav}
             className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-black hover:bg-slate-900 text-white text-xs font-semibold shadow-xs transition-colors"
           >
             <LogIn className="h-3.5 w-3.5" />
@@ -442,6 +485,6 @@ export function Sidebar() {
           </Link>
         )}
       </div>
-    </aside>
+    </Container>
   );
 }

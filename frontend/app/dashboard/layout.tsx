@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef, useMemo } from "react";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Sidebar } from "@/components/Sidebar";
 import { ThreadDetailDrawer } from "@/components/ThreadDetailDrawer";
@@ -9,7 +10,7 @@ import { HeaderSearch } from "@/components/HeaderSearch";
 import { NotificationModal } from "@/components/NotificationModal";
 import { useThreads } from "@/context/ThreadsContext";
 import { authClient } from "@/lib/auth-client";
-import { Bell, Plus } from "lucide-react";
+import { Bell, Plus, Menu, GraduationCap } from "lucide-react";
 
 const SIX_HOURS_MS = 6 * 60 * 60 * 1000;
 
@@ -22,8 +23,10 @@ export default function DashboardLayout({
     useThreads();
   const [isSimulateOpen, setIsSimulateOpen] = useState(false);
   const [isNotifOpen, setIsNotifOpen] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [authChecked, setAuthChecked] = useState(false);
   const bellRef = useRef<HTMLDivElement>(null);
+  const mobileBellRef = useRef<HTMLDivElement>(null);
   const router = useRouter();
 
   // ── Handle OAuth Redirect Parameters ──
@@ -169,13 +172,95 @@ export default function DashboardLayout({
 
   return (
     <div className="h-screen max-h-screen w-full overflow-hidden flex font-sans antialiased text-slate-900 bg-[#e9edef] select-none">
-      {/* Persistent Floating White Sidebar - Sticky & Stationary */}
+      {/* Persistent Floating White Sidebar (Desktop Only: sticky & stationary) */}
       <Sidebar />
 
       {/* Main Content Area - Only this area scrolls */}
-      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto pr-6 py-4">
-        {/* Top Header Bar */}
-        <header className="flex items-center justify-between pb-6 pt-2 shrink-0">
+      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto px-4 py-3 sm:px-6 sm:py-4">
+        {/* Mobile Top Navigation Bar (< lg) */}
+        <div className="lg:hidden flex items-center justify-between pb-3 pt-1 shrink-0 border-b border-black/[0.06] mb-3">
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="h-9 w-9 rounded-xl bg-white border border-black/[0.08] shadow-2xs flex items-center justify-center text-slate-800 hover:bg-slate-50 transition-colors cursor-pointer"
+              aria-label="Open navigation menu"
+            >
+              <Menu className="h-4 w-4" />
+            </button>
+
+            <Link href="/dashboard" className="flex items-center gap-2">
+              <div className="h-8 w-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+                <GraduationCap className="h-4 w-4" />
+              </div>
+              <span className="font-extrabold text-base tracking-tight text-slate-950 font-sans">
+                MailMind
+              </span>
+            </Link>
+          </div>
+
+          <div className="flex items-center gap-2">
+            {/* Quick Inbound Mail trigger */}
+            <button
+              onClick={() => setIsSimulateOpen(true)}
+              className="h-8 px-2.5 rounded-full bg-black text-white text-[11px] font-bold flex items-center gap-1 shadow-2xs hover:bg-slate-800 transition-colors cursor-pointer"
+            >
+              <Plus className="h-3 w-3" />
+              <span className="hidden sm:inline">Inbound</span>
+            </button>
+
+            {/* Notification Bell */}
+            <div ref={mobileBellRef} className="relative">
+              <button
+                title="New Mail Notifications"
+                onClick={() => setIsNotifOpen((v) => !v)}
+                className={`h-8 w-8 rounded-full border shadow-2xs flex items-center justify-center transition-all cursor-pointer ${
+                  isNotifOpen
+                    ? "bg-black text-white border-black"
+                    : "bg-white border-black/[0.08] text-slate-700 hover:bg-slate-50"
+                }`}
+              >
+                <Bell className="h-3.5 w-3.5" />
+              </button>
+
+              {/* Unread badge */}
+              {newMailCount > 0 ? (
+                <span className="absolute -top-1 -right-1 h-3.5 min-w-3.5 px-0.5 rounded-full bg-black text-white text-[8px] font-extrabold flex items-center justify-center ring-2 ring-[#e9edef]">
+                  {newMailCount > 9 ? "9+" : newMailCount}
+                </span>
+              ) : stats.critical > 0 ? (
+                <span className="absolute top-0.5 right-0.5 h-1.5 w-1.5 rounded-full bg-black ring-1 ring-white" />
+              ) : null}
+
+              {/* Mobile Notification popover */}
+              <NotificationModal
+                isOpen={isNotifOpen}
+                onClose={() => setIsNotifOpen(false)}
+                anchorRef={mobileBellRef}
+              />
+            </div>
+
+            {/* User Avatar */}
+            <div className="h-8 w-8 rounded-full bg-slate-900 text-white flex items-center justify-center font-bold text-xs ring-2 ring-white shadow-2xs">
+              {initials}
+            </div>
+          </div>
+        </div>
+
+        {/* Mobile Greeting & Search Sub-bar (< lg) */}
+        <div className="lg:hidden pb-3 space-y-2">
+          <div className="flex items-baseline justify-between">
+            <h1 className="text-xl font-extrabold tracking-tight text-slate-950 font-sans">
+              Hi, {firstName}!
+            </h1>
+            <p className="text-[11px] text-slate-500 font-medium truncate max-w-[170px]">
+              {currentUser?.email}
+            </p>
+          </div>
+          <HeaderSearch />
+        </div>
+
+        {/* Desktop Top Header Bar (>= lg) */}
+        <header className="hidden lg:flex items-center justify-between pb-6 pt-2 shrink-0">
           <div>
             <h1 className="text-3xl font-extrabold tracking-tight text-slate-950 font-sans">
               Hi, {firstName}!
@@ -221,7 +306,7 @@ export default function DashboardLayout({
                 <span className="absolute top-1 right-1 h-2 w-2 rounded-full bg-black ring-2 ring-white" />
               ) : null}
 
-              {/* Notification popover */}
+              {/* Desktop Notification popover */}
               <NotificationModal
                 isOpen={isNotifOpen}
                 onClose={() => setIsNotifOpen(false)}
@@ -250,6 +335,22 @@ export default function DashboardLayout({
         isOpen={isSimulateOpen}
         onClose={() => setIsSimulateOpen(false)}
       />
+
+      {/* Mobile Drawer Sheet (< lg) */}
+      {isMobileMenuOpen && (
+        <div className="lg:hidden fixed inset-0 z-50 flex select-none">
+          {/* Semi-transparent dark backdrop */}
+          <div
+            className="fixed inset-0 bg-black/50 backdrop-blur-xs transition-opacity animate-in fade-in duration-200"
+            onClick={() => setIsMobileMenuOpen(false)}
+          />
+
+          {/* Drawer Sheet */}
+          <div className="relative w-72 sm:w-80 max-w-[85vw] h-full z-10 p-3 sm:p-4 flex flex-col animate-in slide-in-from-left duration-200">
+            <Sidebar isMobile onClose={() => setIsMobileMenuOpen(false)} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

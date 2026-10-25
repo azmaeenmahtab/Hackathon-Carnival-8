@@ -56,10 +56,10 @@ export function PriorityStatStrip() {
           </div>
 
           {/* Quick Actions for Emergency Mails */}
-          <div className="flex items-center gap-2 shrink-0 flex-wrap">
+          <div className="flex items-center gap-2 shrink-0 flex-wrap w-full sm:w-auto">
             <Link
               href="/dashboard/priority/critical"
-              className="px-4 py-2 rounded-xl bg-black hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
+              className="px-4 py-2 rounded-xl bg-black hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center justify-center gap-1.5 w-full sm:w-auto"
             >
               <span>Check Emergency Mails ASAP</span>
               <ArrowRight className="h-3.5 w-3.5" />
@@ -68,7 +68,7 @@ export function PriorityStatStrip() {
             {stats.critical > 0 && (
               <button
                 onClick={batchResolveCriticalThreads}
-                className="px-3.5 py-2 rounded-xl bg-white hover:bg-red-100 text-red-900 border border-red-300/80 text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5"
+                className="px-3.5 py-2 rounded-xl bg-white hover:bg-red-100 text-red-900 border border-red-300/80 text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center justify-center gap-1.5 w-full sm:w-auto"
                 title="Mark all critical threads as resolved / handled"
               >
                 <CheckCircle2 className="h-3.5 w-3.5 text-red-700" />

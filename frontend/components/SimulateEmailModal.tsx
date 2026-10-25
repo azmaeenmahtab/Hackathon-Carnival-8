@@ -155,13 +155,16 @@ export function SimulateEmailModal({
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-xs animate-in fade-in select-none">
+    <div
+      className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/40 backdrop-blur-xs animate-in fade-in select-none"
+      onClick={onClose}
+    >
       <div
-        className="w-full max-w-xl bg-white rounded-[32px] shadow-2xl border border-black/[0.04] overflow-hidden animate-in zoom-in-95 duration-150"
+        className="w-full max-w-xl max-h-[90vh] flex flex-col bg-white rounded-[32px] shadow-2xl border border-black/[0.04] overflow-hidden animate-in zoom-in-95 duration-150"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Modal Header */}
-        <div className="p-6 pb-4 border-b border-slate-100 flex items-start justify-between">
+        <div className="p-4 sm:p-6 pb-4 border-b border-slate-100 flex items-start justify-between shrink-0">
           <div className="flex items-center gap-3">
             <div className="h-10 w-10 rounded-2xl bg-black text-white flex items-center justify-center shadow-xs">
               <Sparkles className="h-5 w-5" />
@@ -178,41 +181,44 @@ export function SimulateEmailModal({
 
           <button
             onClick={onClose}
-            className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-black hover:bg-slate-50 transition-colors"
+            className="h-8 w-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 hover:text-black hover:bg-slate-50 transition-colors cursor-pointer"
+            aria-label="Close modal"
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        {/* Quick Presets */}
-        <div className="p-6 pb-2 space-y-2">
-          <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
-            <Zap className="h-3 w-3 text-black" />
-            Quick Scenarios
-          </span>
-          <div className="grid grid-cols-2 gap-2">
-            {PRESETS.map((p, idx) => (
-              <button
-                key={idx}
-                type="button"
-                onClick={() => handleApplyPreset(p)}
-                className="text-left p-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 hover:bg-black hover:text-white group transition-all"
-              >
-                <div className="flex items-center justify-between">
-                  <span className="text-xs font-bold truncate group-hover:text-white">
-                    {p.label}
-                  </span>
-                  <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white text-slate-700 group-hover:bg-white/20 group-hover:text-white border border-slate-200/60">
-                    {p.tag}
-                  </span>
-                </div>
-              </button>
-            ))}
+        {/* Scrollable Content Container for Small Devices */}
+        <div className="overflow-y-auto flex-1">
+          {/* Quick Presets */}
+          <div className="p-4 sm:p-6 pb-2 space-y-2">
+            <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 flex items-center gap-1">
+              <Zap className="h-3 w-3 text-black" />
+              Quick Scenarios
+            </span>
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+              {PRESETS.map((p, idx) => (
+                <button
+                  key={idx}
+                  type="button"
+                  onClick={() => handleApplyPreset(p)}
+                  className="text-left p-3 rounded-2xl border border-slate-200/80 bg-slate-50/70 hover:bg-black hover:text-white group transition-all cursor-pointer"
+                >
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold truncate group-hover:text-white">
+                      {p.label}
+                    </span>
+                    <span className="text-[9px] font-bold px-2 py-0.5 rounded-full bg-white text-slate-700 group-hover:bg-white/20 group-hover:text-white border border-slate-200/60">
+                      {p.tag}
+                    </span>
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
-        {/* Inbound Form */}
-        <form onSubmit={handleSendEmail} className="p-6 pt-2 space-y-3.5">
+          {/* Inbound Form */}
+          <form onSubmit={handleSendEmail} className="p-4 sm:p-6 pt-2 space-y-3.5">
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1">
               Subject Line
@@ -276,6 +282,7 @@ export function SimulateEmailModal({
             </button>
           </div>
         </form>
+        </div>
       </div>
     </div>
   );

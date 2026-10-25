@@ -18,7 +18,7 @@ export function DailyDigestCard() {
   return (
     <div className="rounded-2xl border border-black/[0.06] bg-white p-5 shadow-2xs transition-all">
       <div className="flex items-start justify-between gap-4">
-        <div className="space-y-2 flex-1 max-w-4xl">
+        <div className="space-y-2 flex-1 ">
           {/* Header row */}
           <div className="flex items-center gap-2.5 flex-wrap">
             <span className="inline-flex items-center gap-1.5 rounded-full bg-black px-2.5 py-0.5 text-[11px] font-bold text-white shadow-xs">

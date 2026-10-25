@@ -80,7 +80,7 @@ export function NotificationModal({ isOpen, onClose, anchorRef }: Props) {
   return (
     <div
       ref={modalRef}
-      className="absolute right-0 top-14 w-[340px] sm:w-[400px] bg-white border border-black/10 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-3 duration-200"
+      className="absolute right-0 top-12 sm:top-14 w-[calc(100vw-2rem)] sm:w-[400px] max-w-[380px] bg-white border border-black/10 rounded-3xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-3 duration-200"
       style={{ maxHeight: "80vh" }}
     >
       {/* Header */}

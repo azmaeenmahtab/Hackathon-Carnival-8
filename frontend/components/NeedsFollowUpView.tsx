@@ -17,7 +17,7 @@ export function NeedsFollowUpView() {
   return (
     <div className="space-y-6 select-none">
       {/* Top Banner (Clean White Card) */}
-      <div className="bg-white rounded-[28px] p-6 shadow-2xs border border-black/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+      <div className="bg-white rounded-[28px] p-4 sm:p-6 shadow-2xs border border-black/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
           <div className="h-11 w-11 rounded-2xl bg-black text-white flex items-center justify-center shrink-0 shadow-xs">
             <ClockAlert className="h-5 w-5" />

@@ -109,7 +109,7 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="bg-white rounded-[28px] p-7 sm:p-9 shadow-sm border border-black/[0.06] space-y-6">
+    <div className="bg-white rounded-[28px] p-5 sm:p-8 shadow-sm border border-black/[0.06] space-y-6">
       {/* Title Header */}
       <div className="space-y-1.5">
         <h2 className="text-2xl font-extrabold text-slate-950 tracking-tight">

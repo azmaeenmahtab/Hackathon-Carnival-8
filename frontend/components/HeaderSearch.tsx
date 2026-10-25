@@ -129,8 +129,8 @@ export function HeaderSearch() {
           onSubmit={handleSubmit}
           className={`flex items-center bg-white border border-black/10 rounded-full px-3.5 py-1.5 shadow-sm transition-all duration-200 ${
             isExpanded
-              ? "w-64 sm:w-80 md:w-96 ring-2 ring-black/5"
-              : "w-64"
+              ? "w-full sm:w-80 md:w-96 ring-2 ring-black/5"
+              : "w-full sm:w-64"
           }`}
         >
           <Search className="h-4 w-4 text-slate-400 shrink-0 mr-2" />
@@ -174,7 +174,7 @@ export function HeaderSearch() {
 
       {/* Floating Results Dropdown Popover */}
       {showDropdown && searchQuery.trim().length > 0 && (
-        <div className="absolute right-0 top-12 w-[340px] sm:w-[420px] bg-white border border-black/10 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
+        <div className="absolute right-0 top-12 w-[calc(100vw-2rem)] sm:w-[420px] max-w-[420px] bg-white border border-black/10 rounded-2xl shadow-xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-150">
           {/* Header summary */}
           <div className="px-4 py-2.5 bg-slate-50/80 border-b border-black/[0.05] flex items-center justify-between">
             <span className="text-[11px] font-bold text-slate-600">

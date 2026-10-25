@@ -19,28 +19,28 @@ export function ToastContainer({ toasts, onDismiss }: ToastProps) {
   if (toasts.length === 0) return null;
 
   return (
-    <div className="fixed bottom-5 right-5 z-50 flex flex-col gap-2 max-w-sm w-full pointer-events-none">
+    <div className="fixed top-4 left-4 right-4 sm:left-auto sm:right-5 sm:top-5 z-[9999] flex flex-col gap-2.5 max-w-sm sm:w-96 pointer-events-none mx-auto sm:mx-0">
       {toasts.map((toast) => (
         <div
           key={toast.id}
-          className="pointer-events-auto flex items-start gap-3 rounded-lg border border-slate-200 bg-white/95 backdrop-blur-md p-4 shadow-lg transition-all animate-in slide-in-from-bottom-3 dark:border-slate-800 dark:bg-slate-900/95"
+          className="pointer-events-auto flex items-start gap-3 rounded-2xl border border-black/10 bg-white/95 backdrop-blur-md p-4 shadow-xl transition-all animate-in slide-in-from-top-3 duration-200"
         >
           {toast.type === "success" && (
-            <CheckCircle2 className="h-5 w-5 text-emerald-600 dark:text-emerald-400 mt-0.5 shrink-0" />
+            <CheckCircle2 className="h-5 w-5 text-emerald-600 mt-0.5 shrink-0" />
           )}
           {toast.type === "warning" && (
-            <AlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 mt-0.5 shrink-0" />
+            <AlertCircle className="h-5 w-5 text-amber-600 mt-0.5 shrink-0" />
           )}
           {(!toast.type || toast.type === "info") && (
-            <Info className="h-5 w-5 text-indigo-600 dark:text-indigo-400 mt-0.5 shrink-0" />
+            <Info className="h-5 w-5 text-slate-800 mt-0.5 shrink-0" />
           )}
 
-          <div className="flex-1">
-            <h4 className="text-sm font-semibold text-slate-900 dark:text-slate-100">
+          <div className="flex-1 min-w-0">
+            <h4 className="text-xs font-bold text-slate-950">
               {toast.title}
             </h4>
             {toast.description && (
-              <p className="text-xs text-slate-600 dark:text-slate-400 mt-0.5">
+              <p className="text-xs text-slate-600 mt-0.5 leading-relaxed">
                 {toast.description}
               </p>
             )}
@@ -48,7 +48,7 @@ export function ToastContainer({ toasts, onDismiss }: ToastProps) {
 
           <button
             onClick={() => onDismiss(toast.id)}
-            className="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 rounded p-0.5"
+            className="text-slate-400 hover:text-slate-700 rounded-lg p-1 transition-colors cursor-pointer shrink-0"
             aria-label="Dismiss toast"
           >
             <X className="h-4 w-4" />

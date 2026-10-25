@@ -47,7 +47,7 @@ export function CategoryFilterTabs() {
       )}
 
       {/* Category Pills */}
-      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none">
+      <div className="flex items-center gap-2 overflow-x-auto pb-1 scrollbar-none [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] touch-pan-x -mx-1 px-1">
         {categories.map((cat) => {
           const isSelected = selectedCategory === cat;
           const count = countForCategory(cat);
