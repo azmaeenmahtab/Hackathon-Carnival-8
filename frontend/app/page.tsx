@@ -155,25 +155,24 @@ export default function LandingPage() {
       {/* ── 2. Hero Section ── */}
       <section className="pt-12 pb-12 sm:pt-14 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
         {/* Main Headline with Creative Contrast Highlights */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 leading-[1.18] max-w-4xl mx-auto animate-fade-in-up">
-          Spend{" "}
-          <span className="relative inline-block mx-1">
-            <span className="relative z-10 text-slate-800 font-black underline decoration-slate-400 decoration-wavy decoration-2 underline-offset-8">
-              less time
-            </span>
-            {/* <span className="absolute -top-3.5 sm:-top-4 -right-3 sm:-right-4 px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] sm:text-xs font-mono font-bold tracking-tight border border-black/5 shadow-2xs hidden sm:inline-flex items-center gap-0.5">
-              <span>↓</span>
-              <span>5 hrs/wk</span>
-            </span> */}
+        <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.2] max-w-4xl mx-auto animate-fade-in-up">
+          <span className="inline-block">
+            spend{" "}
+            <span className="relative inline-block mx-1">
+              <span className="relative z-10 text-slate-800 font-black underline decoration-slate-400 decoration-wavy decoration-2 underline-offset-8">
+                less time
+              </span>
+            </span>{" "}
+            sorting mails,
           </span>{" "}
-          sorting emails.
           <br className="hidden sm:inline" />
-          Spend{" "}
-          <span className="relative inline-block mx-1">
-            <span className="relative z-10 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-2xl bg-black text-white font-black shadow-md inline-flex items-center gap-2 transform -rotate-1 hover:rotate-0 transition-transform duration-300">
-              <span>more teaching.</span>
-              
-            </span>
+          <span className="inline-block mt-1 sm:mt-0">
+            <span className="relative inline-block mx-1">
+              <span className="relative z-10 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-2xl bg-black text-white font-black shadow-md inline-flex items-center gap-2 transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+                <span>more time</span>
+              </span>
+            </span>{" "}
+            teaching.
           </span>
         </h1>
 
