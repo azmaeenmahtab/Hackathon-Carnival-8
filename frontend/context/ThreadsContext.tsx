@@ -75,7 +75,19 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
   );
   const [digestGeneratedAt, setDigestGeneratedAt] = useState<string | null>(null);
 
-  const [currentUser, setCurrentUser] = useState<FacultyUser | null>(null);
+  const [currentUser, setCurrentUser] = useState<FacultyUser | null>(() => {
+    if (typeof window !== "undefined") {
+      const stored = localStorage.getItem("faculty_user");
+      if (stored) {
+        try {
+          return JSON.parse(stored);
+        } catch {
+          return null;
+        }
+      }
+    }
+    return null;
+  });
   const [resolvedThreads, setResolvedThreads] = useState<Thread[]>([]);
   const [resolvingIds, setResolvingIds] = useState<string[]>([]);
 
@@ -132,14 +144,6 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     async function checkBackend() {
       const healthy = await apiClient.checkHealth();
       setIsBackendConnected(healthy);
-      if (healthy) {
-        // Try to pre-load digest (threads load after auth check in page.tsx)
-        const digestRes = await apiClient.getDigest();
-        if (digestRes) {
-          setDigest(digestRes.digestText);
-          setDigestGeneratedAt(digestRes.generatedAt);
-        }
-      }
     }
     checkBackend();
   }, []);
@@ -150,10 +154,17 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     } catch {
       // ignore
     }
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("faculty_session_token");
+      localStorage.removeItem("faculty_user");
+    }
     setCurrentUser(null);
     setThreads(INITIAL_MOCK_THREADS);
     setDigest("Sign in to load your AI-triaged inbox.");
     showToast("Signed Out", "You have been logged out of FacultyInbox AI.", "info");
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    }
   };
 
   // ── Live stats computed from current thread list ───────────────────────────

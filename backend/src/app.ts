@@ -40,6 +40,7 @@ app.use(
       return callback(null, false);
     },
     credentials: true,
+    exposedHeaders: ["set-auth-token", "Set-Cookie"],
   })
 );
 

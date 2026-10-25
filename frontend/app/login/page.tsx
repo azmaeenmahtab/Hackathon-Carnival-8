@@ -28,6 +28,16 @@ export default function LoginPage() {
   const [isLoading, setIsLoading] = useState(false);
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedToken = localStorage.getItem("faculty_session_token");
+      const storedUser = localStorage.getItem("faculty_user");
+      if (storedToken && storedUser) {
+        window.location.href = "/";
+      }
+    }
+  }, []);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
@@ -51,7 +61,15 @@ export default function LoginPage() {
           setErrorMessage(res.error.message || "Failed to create faculty account.");
         } else {
           showToast("Account Created", "Welcome to FacultyInbox AI!", "success");
+          const dataObj = res.data as any;
+          const token = dataObj?.token || dataObj?.session?.token || (res as any)?.token;
+          if (token && typeof window !== "undefined") {
+            localStorage.setItem("faculty_session_token", token);
+          }
           if (res.data?.user) {
+            if (typeof window !== "undefined") {
+              localStorage.setItem("faculty_user", JSON.stringify(res.data.user));
+            }
             setCurrentUser({
               id: res.data.user.id,
               name: res.data.user.name,
@@ -59,7 +77,7 @@ export default function LoginPage() {
               department,
             });
           }
-          router.push("/");
+          window.location.href = "/";
         }
       } else {
         const res = await authClient.signIn.email({
@@ -71,7 +89,15 @@ export default function LoginPage() {
           setErrorMessage(res.error.message || "Invalid credentials. Please verify your email and password.");
         } else {
           showToast("Signed In", "Welcome back, Professor!", "success");
+          const dataObj = res.data as any;
+          const token = dataObj?.token || dataObj?.session?.token || (res as any)?.token;
+          if (token && typeof window !== "undefined") {
+            localStorage.setItem("faculty_session_token", token);
+          }
           if (res.data?.user) {
+            if (typeof window !== "undefined") {
+              localStorage.setItem("faculty_user", JSON.stringify(res.data.user));
+            }
             setCurrentUser({
               id: res.data.user.id,
               name: res.data.user.name,
@@ -79,7 +105,7 @@ export default function LoginPage() {
               department: "Department of Computer Science",
             });
           }
-          router.push("/");
+          window.location.href = "/";
         }
       }
     } catch (err: any) {

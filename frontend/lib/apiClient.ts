@@ -2,10 +2,31 @@ import { Thread, PriorityStats } from "@/types/threads";
 
 const API_BASE = process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000";
 
-/** Shared fetch options — always send cookies so Better Auth session is forwarded */
-const BASE_OPTS: RequestInit = {
-  credentials: "include",
-};
+/**
+ * Builds request options including credentials and bearer token fallback.
+ * Cross-domain requests between frontend.vercel.app and backend.vercel.app
+ * may block third-party cookies; sending Bearer token guarantees authentication.
+ */
+function getRequestOptions(customOpts: RequestInit = {}): RequestInit {
+  const headers: Record<string, string> = {};
+
+  if (typeof window !== "undefined") {
+    const token = localStorage.getItem("faculty_session_token");
+    if (token) {
+      headers["Authorization"] = `Bearer ${token}`;
+      headers["x-session-token"] = token;
+    }
+  }
+
+  return {
+    credentials: "include",
+    ...customOpts,
+    headers: {
+      ...headers,
+      ...((customOpts.headers as Record<string, string>) || {}),
+    },
+  };
+}
 
 export interface SyncResult {
   ingested: number;
@@ -52,7 +73,7 @@ export const apiClient = {
 
       const res = await fetch(
         `${API_BASE}/api/threads?${params.toString()}`,
-        BASE_OPTS
+        getRequestOptions()
       );
       if (!res.ok) return null;
       const json = await res.json();
@@ -70,7 +91,7 @@ export const apiClient = {
 
   async getThreadById(id: string): Promise<Thread | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/${id}`, BASE_OPTS);
+      const res = await fetch(`${API_BASE}/api/threads/${id}`, getRequestOptions());
       if (!res.ok) return null;
       const json = await res.json();
       return json.success ? json.data : null;
@@ -81,7 +102,7 @@ export const apiClient = {
 
   async getFollowUpThreads(): Promise<{ items: Thread[]; total: number } | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/follow-up`, BASE_OPTS);
+      const res = await fetch(`${API_BASE}/api/threads/follow-up`, getRequestOptions());
       if (!res.ok) return null;
       const json = await res.json();
       return json.success
@@ -98,7 +119,7 @@ export const apiClient = {
     filteredPercent: number;
   } | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/other`, BASE_OPTS);
+      const res = await fetch(`${API_BASE}/api/threads/other`, getRequestOptions());
       if (!res.ok) return null;
       const json = await res.json();
       return json.success
@@ -120,7 +141,7 @@ export const apiClient = {
     aiGenerated?: boolean;
   } | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/digest`, BASE_OPTS);
+      const res = await fetch(`${API_BASE}/api/digest`, getRequestOptions());
       if (!res.ok) return null;
       const json = await res.json();
       return json.success ? json.data : null;
@@ -131,7 +152,7 @@ export const apiClient = {
 
   async getStats(): Promise<PriorityStats | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/stats/overview`, BASE_OPTS);
+      const res = await fetch(`${API_BASE}/api/stats/overview`, getRequestOptions());
       if (!res.ok) return null;
       const json = await res.json();
       return json.success ? json.data : null;
@@ -142,12 +163,14 @@ export const apiClient = {
 
   async triggerMockSync(reset = false): Promise<SyncResult | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/sync/mock`, {
-        ...BASE_OPTS,
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reset }),
-      });
+      const res = await fetch(
+        `${API_BASE}/api/sync/mock`,
+        getRequestOptions({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reset }),
+        })
+      );
       if (!res.ok) return null;
       const json = await res.json();
       return json.success ? json.data : null;
@@ -158,12 +181,14 @@ export const apiClient = {
 
   async markRead(id: string, isRead: boolean): Promise<boolean> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/${id}/read`, {
-        ...BASE_OPTS,
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ isRead }),
-      });
+      const res = await fetch(
+        `${API_BASE}/api/threads/${id}/read`,
+        getRequestOptions({
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ isRead }),
+        })
+      );
       return res.ok;
     } catch {
       return false;
@@ -172,12 +197,14 @@ export const apiClient = {
 
   async reclassify(id: string, category: string): Promise<boolean> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/${id}/reclassify`, {
-        ...BASE_OPTS,
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ category }),
-      });
+      const res = await fetch(
+        `${API_BASE}/api/threads/${id}/reclassify`,
+        getRequestOptions({
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ category }),
+        })
+      );
       return res.ok;
     } catch {
       return false;
@@ -191,12 +218,14 @@ export const apiClient = {
     isFaculty?: boolean;
   }): Promise<Thread | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/incoming`, {
-        ...BASE_OPTS,
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(data),
-      });
+      const res = await fetch(
+        `${API_BASE}/api/threads/incoming`,
+        getRequestOptions({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(data),
+        })
+      );
       if (!res.ok) return null;
       const json = await res.json();
       return json.success ? json.data : null;
@@ -207,12 +236,14 @@ export const apiClient = {
 
   async resolveThread(id: string, note?: string): Promise<boolean> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/${id}/resolve`, {
-        ...BASE_OPTS,
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ note }),
-      });
+      const res = await fetch(
+        `${API_BASE}/api/threads/${id}/resolve`,
+        getRequestOptions({
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ note }),
+        })
+      );
       return res.ok;
     } catch {
       return false;
@@ -221,7 +252,7 @@ export const apiClient = {
 
   async getResolvedThreads(): Promise<{ items: Thread[]; total: number } | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/resolved`, BASE_OPTS);
+      const res = await fetch(`${API_BASE}/api/threads/resolved`, getRequestOptions());
       if (!res.ok) return null;
       const json = await res.json();
       return json.success
@@ -234,10 +265,10 @@ export const apiClient = {
 
   async restoreResolvedThread(id: string): Promise<Thread | null> {
     try {
-      const res = await fetch(`${API_BASE}/api/threads/resolved/${id}/restore`, {
-        ...BASE_OPTS,
-        method: "POST",
-      });
+      const res = await fetch(
+        `${API_BASE}/api/threads/resolved/${id}/restore`,
+        getRequestOptions({ method: "POST" })
+      );
       if (!res.ok) return null;
       const json = await res.json();
       return json.success ? json.data : null;

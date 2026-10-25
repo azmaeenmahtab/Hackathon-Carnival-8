@@ -43,21 +43,69 @@ export default function Home() {
     async function checkSession() {
       try {
         const session = await authClient.getSession();
-        if (!session?.data?.user) {
-          router.replace("/login");
+        if (session?.data?.user) {
+          if (!currentUser || currentUser.id === "user-vance") {
+            setCurrentUser({
+              id: session.data.user.id,
+              name: session.data.user.name,
+              email: session.data.user.email,
+              department: "Department of Computer Science",
+            });
+          }
+          if (typeof window !== "undefined") {
+            localStorage.setItem("faculty_user", JSON.stringify(session.data.user));
+          }
+          setAuthChecked(true);
           return;
         }
-        // Sync user into context if not already set
-        if (!currentUser || currentUser.id === "user-vance") {
-          setCurrentUser({
-            id: session.data.user.id,
-            name: session.data.user.name,
-            email: session.data.user.email,
-            department: "Department of Computer Science",
-          });
+
+        // Fallback: Check localStorage if cookie is partitioned/blocked across Vercel subdomains
+        if (typeof window !== "undefined") {
+          const storedToken = localStorage.getItem("faculty_session_token");
+          const storedUserRaw = localStorage.getItem("faculty_user");
+          if (storedToken && storedUserRaw) {
+            try {
+              const parsedUser = JSON.parse(storedUserRaw);
+              if (parsedUser && parsedUser.id) {
+                setCurrentUser({
+                  id: parsedUser.id,
+                  name: parsedUser.name || "Professor",
+                  email: parsedUser.email || "",
+                  department: parsedUser.department || "Department of Computer Science",
+                });
+                setAuthChecked(true);
+                return;
+              }
+            } catch {
+              // ignore json parse error
+            }
+          }
         }
-        setAuthChecked(true);
+
+        router.replace("/login");
       } catch {
+        // Fallback on network error: check localStorage
+        if (typeof window !== "undefined") {
+          const storedToken = localStorage.getItem("faculty_session_token");
+          const storedUserRaw = localStorage.getItem("faculty_user");
+          if (storedToken && storedUserRaw) {
+            try {
+              const parsedUser = JSON.parse(storedUserRaw);
+              if (parsedUser && parsedUser.id) {
+                setCurrentUser({
+                  id: parsedUser.id,
+                  name: parsedUser.name || "Professor",
+                  email: parsedUser.email || "",
+                  department: parsedUser.department || "Department of Computer Science",
+                });
+                setAuthChecked(true);
+                return;
+              }
+            } catch {
+              // ignore
+            }
+          }
+        }
         router.replace("/login");
       }
     }

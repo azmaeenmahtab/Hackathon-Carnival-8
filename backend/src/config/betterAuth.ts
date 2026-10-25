@@ -1,5 +1,6 @@
 import { betterAuth } from "better-auth";
 import { mongodbAdapter } from "better-auth/adapters/mongodb";
+import { bearer } from "better-auth/plugins";
 import mongoose from "mongoose";
 import { env } from "./env.js";
 
@@ -16,11 +17,25 @@ const lazyDb = new Proxy({} as any, {
   },
 });
 
+const configuredOrigins = env.BETTER_AUTH_TRUSTED_ORIGINS.split(",").map((o) => o.trim());
+
 export const auth = betterAuth({
   database: mongodbAdapter(lazyDb),
   secret: env.BETTER_AUTH_SECRET,
   baseURL: env.BETTER_AUTH_URL,
-  trustedOrigins: env.BETTER_AUTH_TRUSTED_ORIGINS.split(",").map((o) => o.trim()),
+  trustedOrigins: [
+    ...configuredOrigins,
+    "https://*.vercel.app",
+    "http://localhost:3000",
+  ],
+  advanced: {
+    defaultCookieAttributes: {
+      sameSite: "none",
+      secure: true,
+      partitioned: true,
+    },
+  },
+  plugins: [bearer()],
   emailAndPassword: {
     enabled: true,
   },
