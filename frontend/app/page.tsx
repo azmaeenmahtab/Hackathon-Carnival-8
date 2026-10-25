@@ -136,41 +136,41 @@ export default function LandingPage() {
 
       {/* ── 2. Hero Section ── */}
       <section className="pt-16 pb-12 sm:pt-20 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
-        {/* Dynamic One-by-One Role Banner (Replaces static floating pill) */}
-        <div className="inline-flex items-center gap-2.5 px-4 py-2 rounded-full bg-white border border-black/[0.08] shadow-2xs text-xs font-semibold text-slate-700">
-          <span className="flex h-2 w-2 relative">
-            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500" />
-          </span>
-          <span className="text-slate-500">Built specifically for</span>
-          <div className="h-5 overflow-hidden inline-flex items-center">
+        {/* University Email Intelligence Kicker */}
+        <div className="text-xs font-extrabold tracking-widest uppercase text-slate-500 flex items-center justify-center gap-2">
+          <span className="h-1.5 w-1.5 rounded-full bg-black" />
+          <span>University Email Intelligence</span>
+        </div>
+
+        {/* Main Headline (Preserved exactly as user requested) */}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 leading-[1.12] max-w-4xl mx-auto animate-fade-in-up">
+          Spend less time sorting emails.
+          <br className="hidden sm:inline" />
+          <span className="text-slate-950">Spend more time teaching.</span>
+        </h1>
+
+        {/* Big Format Dynamic Role Ticker - NOT in a pill, large bold typography */}
+        <div className="py-2 flex flex-col sm:flex-row items-center justify-center gap-2 sm:gap-3 text-2xl sm:text-3xl lg:text-4xl font-extrabold tracking-tight">
+          <span className="text-slate-400 font-bold">Built for university</span>
+          <div className="relative inline-flex items-center h-12 sm:h-14 overflow-hidden border-b-[3px] border-black pb-1 min-w-[210px] justify-center sm:justify-start">
             <span
-              className={`font-extrabold text-slate-950 inline-block transition-all duration-300 transform min-w-[110px] text-left ${
-                isRoleFading
-                  ? "-translate-y-3 opacity-0"
-                  : "translate-y-0 opacity-100"
-              }`}
+              key={roleIndex}
+              className="text-black font-black inline-block animate-text-swap"
             >
               {TARGET_ROLES[roleIndex]}
             </span>
           </div>
         </div>
 
-        {/* Main Headline (Preserved exactly as user requested) */}
-        <h1 className="text-4xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.14] max-w-3xl mx-auto animate-fade-in-up">
-          Spend less time sorting emails. Spend more time teaching.
-        </h1>
-
         {/* Subtitle - In Plain, Friendly Words (Preserved exactly) */}
-        <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed">
+        <p className="text-base sm:text-lg text-slate-600 max-w-2xl mx-auto leading-relaxed pt-1">
           MailMind highlights urgent student questions and exam deadlines first, while putting campus newsletters and routine announcements quietly in the background.
         </p>
 
-        {/* Role Pill Indicators - Shows roles one by one with live active indicator */}
-        <div className="flex items-center justify-center gap-2 pt-1 flex-wrap">
-          <span className="text-xs font-semibold text-slate-400 mr-0.5">Focusing on:</span>
+        {/* New Format: 3-Card Interactive Role Showcase (No small pills) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 max-w-2xl mx-auto pt-2 text-left">
           {TARGET_ROLES.map((role, idx) => (
-            <button
+            <div
               key={role}
               onClick={() => {
                 setIsRoleFading(true);
@@ -179,14 +179,41 @@ export default function LandingPage() {
                   setIsRoleFading(false);
                 }, 150);
               }}
-              className={`px-3.5 py-1 rounded-full text-xs font-bold transition-all duration-300 cursor-pointer ${
+              className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
                 roleIndex === idx
-                  ? "bg-black text-white shadow-xs scale-105"
-                  : "bg-white/80 text-slate-600 hover:text-black hover:bg-white border border-black/[0.06]"
+                  ? "bg-black text-white border-black shadow-md scale-[1.03] ring-2 ring-black/10"
+                  : "bg-white text-slate-700 border-black/[0.06] hover:border-black/20 hover:bg-slate-50 shadow-2xs"
               }`}
             >
-              {role}
-            </button>
+              <div className="flex items-center justify-between mb-1">
+                <span
+                  className={`text-[10px] font-bold uppercase tracking-wider ${
+                    roleIndex === idx ? "text-slate-400" : "text-slate-400"
+                  }`}
+                >
+                  0{idx + 1}
+                </span>
+                <span
+                  className={`h-2 w-2 rounded-full ${
+                    roleIndex === idx ? "bg-white animate-pulse" : "bg-slate-300"
+                  }`}
+                />
+              </div>
+              <div className="text-base font-extrabold tracking-tight">
+                {role}
+              </div>
+              <p
+                className={`text-[11px] mt-0.5 leading-snug ${
+                  roleIndex === idx ? "text-slate-300" : "text-slate-400"
+                }`}
+              >
+                {idx === 0
+                  ? "Urgent grade inquiries & thesis deadlines"
+                  : idx === 1
+                  ? "Class assignments & student questions"
+                  : "Lab sections & office hour requests"}
+              </p>
+            </div>
           ))}
         </div>
 
