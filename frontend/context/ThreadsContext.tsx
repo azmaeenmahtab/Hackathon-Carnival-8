@@ -51,6 +51,7 @@ interface ThreadsContextType {
   resolveThread: (id: string, note?: string) => Promise<void>;
   restoreResolvedThread: (id: string) => Promise<void>;
   fetchResolvedThreads: () => Promise<void>;
+  batchResolveCriticalThreads: () => Promise<void>;
   purgeDemoThreads: () => Promise<void>;
   clearAllThreads: () => Promise<void>;
   showToast: (
@@ -377,6 +378,48 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     }
   };
 
+  const batchResolveCriticalThreads = async () => {
+    const criticals = threads.filter((t) => t.urgency === "Critical");
+    if (criticals.length === 0) {
+      showToast("No Critical Mails", "There are currently no critical threads in the queue.", "info");
+      return;
+    }
+
+    const ok = confirm(`Resolve all ${criticals.length} critical email(s) and clear the emergency queue?`);
+    if (!ok) return;
+
+    const criticalIds = criticals.map((t) => t.id);
+    setResolvingIds((prev) => [...prev, ...criticalIds]);
+
+    showToast(
+      "Critical Queue Cleared",
+      `Marked ${criticals.length} critical items as resolved.`,
+      "success"
+    );
+
+    const now = new Date().toISOString();
+    const resolvedItems: Thread[] = criticals.map((t) => ({
+      ...t,
+      isRead: true,
+      needsFollowUp: false,
+      resolvedAt: now,
+      resolutionNote: "Batch cleared by faculty emergency triage",
+    }));
+
+    setThreads((prev) => prev.filter((t) => !criticalIds.includes(t.id)));
+    setResolvedThreads((prev) => [...resolvedItems, ...prev]);
+    setResolvingIds((prev) => prev.filter((id) => !criticalIds.includes(id)));
+
+    if (isBackendConnected) {
+      await Promise.allSettled(
+        criticalIds.map((id) =>
+          apiClient.resolveThread(id, "Batch cleared by faculty emergency triage")
+        )
+      );
+      await refreshThreads();
+    }
+  };
+
   return (
     <ThreadsContext.Provider
       value={{
@@ -408,6 +451,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
         resolvingIds,
         resolveThread,
         restoreResolvedThread,
+        batchResolveCriticalThreads,
         fetchResolvedThreads,
         purgeDemoThreads,
         clearAllThreads,

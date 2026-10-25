@@ -282,24 +282,46 @@ export function ThreadCard({ thread }: { thread: Thread }) {
           </span>
         </div>
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            markAsRead(thread.id, !thread.isRead);
-          }}
-          className={`h-8 w-8 rounded-full flex items-center justify-center transition-all cursor-pointer ${
-            thread.isRead
-              ? "bg-slate-100 text-slate-400 hover:bg-slate-200"
-              : "bg-black text-white hover:bg-slate-800 shadow-xs"
-          }`}
-          title={thread.isRead ? "Mark as unread" : "Mark as read"}
-        >
-          {thread.isRead ? (
-            <CheckCircle2 className="h-3.5 w-3.5" />
-          ) : (
-            <Bell className="h-3.5 w-3.5" />
-          )}
-        </button>
+        <div className="flex items-center gap-1.5">
+          {/* Quick Resolve / Clear Button */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              resolveThread(thread.id);
+            }}
+            className={`px-2.5 py-1 rounded-full text-[10px] font-bold transition-all flex items-center gap-1 cursor-pointer ${
+              thread.urgency === "Critical"
+                ? "bg-red-50 text-red-700 hover:bg-red-600 hover:text-white border border-red-200"
+                : thread.urgency === "High"
+                ? "bg-amber-50 text-amber-700 hover:bg-black hover:text-white border border-amber-200"
+                : "bg-slate-100 text-slate-700 hover:bg-black hover:text-white"
+            }`}
+            title="Mark this email as handled / resolved"
+          >
+            <CheckCircle2 className="h-3 w-3" />
+            <span>Resolve</span>
+          </button>
+
+          {/* Read / Unread Toggle */}
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              markAsRead(thread.id, !thread.isRead);
+            }}
+            className={`h-7 w-7 rounded-full flex items-center justify-center transition-all cursor-pointer ${
+              thread.isRead
+                ? "bg-slate-100 text-slate-400 hover:bg-slate-200"
+                : "bg-black text-white hover:bg-slate-800 shadow-xs"
+            }`}
+            title={thread.isRead ? "Mark as unread" : "Mark as read"}
+          >
+            {thread.isRead ? (
+              <CheckCircle2 className="h-3 w-3" />
+            ) : (
+              <Bell className="h-3 w-3" />
+            )}
+          </button>
+        </div>
       </div>
     </div>
   );

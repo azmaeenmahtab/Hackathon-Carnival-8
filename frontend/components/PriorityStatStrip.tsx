@@ -6,12 +6,10 @@ import {
   Mail,
   CheckCircle2,
   ShieldAlert,
-  AlertCircle,
-  Sparkles,
-  RefreshCw,
-  Archive,
+  AlertTriangle,
   ArrowRight,
-  Filter,
+  RotateCcw,
+  Sparkles,
 } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
 
@@ -20,12 +18,10 @@ export function PriorityStatStrip() {
     threads,
     resolvedThreads,
     stats,
-    syncWithBackend,
-    isSyncing,
     setActiveView,
     selectedUrgency,
     setSelectedUrgency,
-    setSelectedCategory,
+    batchResolveCriticalThreads,
   } = useThreads();
 
   // Noise filtered count (Other category)
@@ -37,251 +33,224 @@ export function PriorityStatStrip() {
       ? Math.round((noiseThreads.length / threads.length) * 100)
       : 0;
 
-  // Student & academic core threads
-  const academicThreads = threads.filter(
-    (t) => (t.correctedCategory ?? t.category) !== "Other"
-  );
+  const hasUrgent = stats.critical > 0 || stats.high > 0;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
-      {/* 1. Matte Black Card - "Overall Priority Queue" */}
-      <div className="bg-[#121214] text-white rounded-[32px] p-6 shadow-sm flex flex-col justify-between relative overflow-hidden">
-        <div>
-          {/* Header */}
-          <div className="flex items-center justify-between text-xs text-slate-400 mb-5">
-            <span className="font-semibold tracking-wide text-white flex items-center gap-1.5">
-              <span className="h-2 w-2 rounded-full bg-emerald-400 animate-pulse" />
-              Overall Triage Queue
-            </span>
+    <div className="space-y-4">
+      {/* ── 1. Emergency Triage Action Banner ── */}
+      {hasUrgent ? (
+        <div className="bg-red-50/90 border border-red-200/80 rounded-2xl p-4 sm:p-5 shadow-2xs flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all">
+          <div className="flex items-start sm:items-center gap-3.5">
+            <div className="h-10 w-10 rounded-xl bg-red-600 text-white flex items-center justify-center shrink-0 shadow-xs">
+              <AlertTriangle className="h-5 w-5" />
+            </div>
+            <div>
+              <div className="flex items-center gap-2 flex-wrap">
+                <span className="text-xs font-extrabold uppercase tracking-wider text-red-900">
+                  Emergency Action Required
+                </span>
+                <span className="px-2 py-0.5 rounded-full bg-red-200 text-red-950 text-[10px] font-bold">
+                  {stats.critical} Critical · {stats.high} High
+                </span>
+              </div>
+              <p className="text-xs text-red-800 font-medium mt-0.5 leading-relaxed">
+                Time-sensitive student inquiries and urgent academic deadlines require immediate faculty review.
+              </p>
+            </div>
+          </div>
+
+          {/* Quick Actions for Emergency Mails */}
+          <div className="flex items-center gap-2 shrink-0 flex-wrap">
             <button
               onClick={() =>
                 setSelectedUrgency(
                   selectedUrgency === "Critical" ? "All" : "Critical"
                 )
               }
-              className={`text-[11px] font-bold px-2.5 py-1 rounded-full transition-colors cursor-pointer ${
-                selectedUrgency === "Critical"
-                  ? "bg-white text-black"
-                  : "bg-white/10 text-slate-300 hover:bg-white/20"
-              }`}
-              title="Toggle Critical Filter"
+              className="px-4 py-2 rounded-xl bg-black hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
             >
-              Filter Critical
+              <span>
+                {selectedUrgency === "Critical"
+                  ? "Show All Mails"
+                  : "Check Emergency Mails ASAP"}
+              </span>
+              <ArrowRight className="h-3.5 w-3.5" />
             </button>
+
+            {stats.critical > 0 && (
+              <button
+                onClick={batchResolveCriticalThreads}
+                className="px-3.5 py-2 rounded-xl bg-white hover:bg-red-100 text-red-900 border border-red-300/80 text-xs font-bold transition-all shadow-2xs cursor-pointer flex items-center gap-1.5"
+                title="Mark all critical threads as resolved / handled"
+              >
+                <CheckCircle2 className="h-3.5 w-3.5 text-red-700" />
+                <span>Clear Critical Queue</span>
+              </button>
+            )}
           </div>
-
-          {/* Large Stat Numbers */}
-          <div className="flex items-baseline gap-6 mb-6">
-            <div className="flex items-baseline gap-2">
-              <span className="text-4xl font-extrabold tracking-tight text-white font-sans">
-                {stats.totalThreads}
-              </span>
-              <span className="text-[11px] text-slate-400 font-medium leading-tight max-w-[70px]">
-                Total triaged
-              </span>
+        </div>
+      ) : (
+        <div className="bg-white border border-black/[0.06] rounded-2xl p-3.5 px-5 flex items-center justify-between text-xs shadow-2xs transition-all">
+          <div className="flex items-center gap-2.5">
+            <div className="h-6 w-6 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center shrink-0">
+              <CheckCircle2 className="h-3.5 w-3.5" />
             </div>
+            <span className="font-semibold text-slate-800">
+              Emergency Queue Clear: No critical academic disputes or tight deadlines pending.
+            </span>
+          </div>
+          <span className="text-slate-400 text-[11px] font-medium hidden sm:inline">
+            All faculty priorities stabilized
+          </span>
+        </div>
+      )}
 
-            <div className="flex items-baseline gap-2 border-l border-white/10 pl-5">
-              <span className="text-4xl font-extrabold tracking-tight text-white font-sans flex items-center gap-1.5">
-                {stats.critical}
-                {stats.critical > 0 && (
-                  <span className="h-2.5 w-2.5 rounded-full bg-red-500" />
-                )}
+      {/* ── 2. Standard Industry Practice: 4 Clean Unified Metric Cards ── */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+        {/* Card 1: Emergency & High Priority */}
+        <div
+          onClick={() =>
+            setSelectedUrgency(
+              selectedUrgency === "Critical"
+                ? "All"
+                : stats.critical > 0
+                ? "Critical"
+                : "High"
+            )
+          }
+          className={`p-4 sm:p-5 rounded-2xl bg-white border transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group ${
+            selectedUrgency === "Critical" || selectedUrgency === "High"
+              ? "border-black ring-2 ring-black/5"
+              : "border-black/[0.06] hover:border-black/20"
+          }`}
+          title="Click to filter urgent correspondence"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">
+              Urgent / Action
+            </span>
+            <div
+              className={`h-8 w-8 rounded-xl flex items-center justify-center ${
+                stats.critical > 0
+                  ? "bg-red-50 text-red-600"
+                  : stats.high > 0
+                  ? "bg-amber-50 text-amber-600"
+                  : "bg-emerald-50 text-emerald-600"
+              }`}
+            >
+              {stats.critical > 0 ? (
+                <ShieldAlert className="h-4 w-4" />
+              ) : stats.high > 0 ? (
+                <AlertTriangle className="h-4 w-4" />
+              ) : (
+                <CheckCircle2 className="h-4 w-4" />
+              )}
+            </div>
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold tracking-tight text-slate-950 font-sans">
+              {stats.critical + stats.high}
+            </div>
+            <div className="text-[11px] font-medium text-slate-500 mt-1 flex items-center justify-between">
+              <span>
+                {stats.critical > 0 ? (
+                  <strong className="text-red-600 font-bold">
+                    {stats.critical} Critical
+                  </strong>
+                ) : (
+                  "0 Critical"
+                )}{" "}
+                · {stats.high} High
               </span>
-              <span className="text-[11px] text-slate-400 font-medium leading-tight max-w-[75px]">
-                Critical deadlines
+              <span className="text-[10px] font-bold text-black group-hover:underline">
+                {selectedUrgency === "Critical" ? "Filtered" : "Filter →"}
               </span>
             </div>
           </div>
         </div>
 
-        {/* 3 White Mini Cards inside the Black Card */}
-        <div className="grid grid-cols-3 gap-2.5 pt-2">
-          {/* Resolved button */}
-          <button
-            onClick={() => setActiveView("resolved")}
-            className="bg-white text-slate-900 rounded-2xl p-3 text-center shadow-xs flex flex-col items-center justify-center hover:bg-slate-100 transition-all cursor-pointer"
-            title="View resolved threads collection"
-          >
-            <div className="h-5 w-5 rounded-full border border-slate-300 flex items-center justify-center mb-1">
-              <CheckCircle2 className="h-3 w-3 text-emerald-600" />
+        {/* Card 2: Needs Follow-Up */}
+        <div
+          onClick={() => setActiveView("follow-up")}
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group"
+          title="Click to view follow-up queue"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">
+              Needs Follow-Up
+            </span>
+            <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center">
+              <ClockAlert className="h-4 w-4" />
             </div>
-            <div className="text-lg font-extrabold tracking-tight font-sans text-emerald-700">
-              {resolvedThreads.length}
-            </div>
-            <div className="text-[10px] font-bold text-slate-700">
-              Resolved
-            </div>
-          </button>
-
-          {/* Follow-Up button */}
-          <button
-            onClick={() => setActiveView("follow-up")}
-            className="bg-white text-slate-900 rounded-2xl p-3 text-center shadow-xs flex flex-col items-center justify-center hover:bg-slate-100 transition-all cursor-pointer"
-            title="View Follow-Up safety net"
-          >
-            <div className="h-5 w-5 rounded-full border-2 border-dashed border-black flex items-center justify-center mb-1">
-              <ClockAlert className="h-2.5 w-2.5 text-black" />
-            </div>
-            <div className="text-lg font-extrabold tracking-tight font-sans text-black">
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold tracking-tight text-slate-950 font-sans">
               {stats.needsFollowUp}
             </div>
-            <div className="text-[10px] font-bold text-black">
-              Follow-Up
+            <div className="text-[11px] font-medium text-slate-500 mt-1 flex items-center justify-between">
+              <span>Awaiting reply past 48h</span>
+              <span className="text-[10px] font-bold text-black group-hover:underline">
+                View →
+              </span>
             </div>
-          </button>
+          </div>
+        </div>
 
-          {/* Unread */}
-          <div className="bg-white text-slate-900 rounded-2xl p-3 text-center shadow-xs flex flex-col items-center justify-center">
-            <div className="h-5 w-5 rounded-full border border-slate-300 flex items-center justify-center mb-1">
-              <Mail className="h-2.5 w-2.5 text-slate-900" />
+        {/* Card 3: Unread Messages */}
+        <div
+          onClick={() => {
+            setSelectedUrgency("All");
+            setActiveView("dashboard");
+          }}
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group"
+          title="Total unread correspondence"
+        >
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">
+              Unread Inbox
+            </span>
+            <div className="h-8 w-8 rounded-xl bg-slate-100 text-slate-900 flex items-center justify-center">
+              <Mail className="h-4 w-4" />
             </div>
-            <div className="text-lg font-extrabold tracking-tight font-sans">
+          </div>
+          <div>
+            <div className="text-3xl font-extrabold tracking-tight text-slate-950 font-sans">
               {stats.unread}
             </div>
-            <div className="text-[10px] font-semibold text-slate-500">
-              Unread
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. White Card - "Action Needed & Urgency Breakdown" */}
-      <div className="bg-white text-slate-900 rounded-[32px] p-6 shadow-sm border border-black/[0.04] flex flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between text-xs mb-4">
-            <span className="font-bold tracking-tight text-sm text-slate-950 flex items-center gap-1.5">
-              <AlertCircle className="h-4 w-4 text-black" />
-              Action & Urgency Safety Net
-            </span>
-            <span className="bg-black text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-              {stats.critical + stats.high} Pending Action
-            </span>
-          </div>
-
-          {/* 2 Prominent Metric Badges */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col">
-              <span className="text-xs text-slate-500 font-medium">Critical / High</span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-extrabold text-slate-950 font-sans">
-                  {stats.critical + stats.high}
-                </span>
-                <span className="text-[10px] font-semibold text-slate-400">threads</span>
-              </div>
-              <span className="text-[10px] text-red-600 font-bold mt-1">
-                {stats.critical} with tight deadline
-              </span>
-            </div>
-
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col">
-              <span className="text-xs text-slate-500 font-medium">Awaiting Reply</span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-extrabold text-slate-950 font-sans">
-                  {stats.needsFollowUp}
-                </span>
-                <span className="text-[10px] font-semibold text-slate-400">past 48h</span>
-              </div>
-              <span className="text-[10px] text-orange-600 font-bold mt-1">
-                Needs professor reply
+            <div className="text-[11px] font-medium text-slate-500 mt-1 flex items-center justify-between">
+              <span>Of {stats.totalThreads} total triaged</span>
+              <span className="text-[10px] font-bold text-black group-hover:underline">
+                Inbox →
               </span>
             </div>
           </div>
-
-          {/* Quick Filter Pill Buttons */}
-          <div className="flex items-center gap-2 pt-1 flex-wrap text-xs">
-            <button
-              onClick={() => setSelectedUrgency("Critical")}
-              className="px-3 py-1 rounded-full bg-red-50 text-red-700 text-[11px] font-bold hover:bg-red-100 transition-colors cursor-pointer"
-            >
-              ● {stats.critical} Critical
-            </button>
-            <button
-              onClick={() => setSelectedUrgency("High")}
-              className="px-3 py-1 rounded-full bg-orange-50 text-orange-700 text-[11px] font-bold hover:bg-orange-100 transition-colors cursor-pointer"
-            >
-              ● {stats.high} High
-            </button>
-            <button
-              onClick={() => setSelectedUrgency("All")}
-              className="px-3 py-1 rounded-full bg-slate-100 text-slate-700 text-[11px] font-bold hover:bg-slate-200 transition-colors cursor-pointer"
-            >
-              View All
-            </button>
-          </div>
         </div>
 
-        {/* Direct Action Link */}
-        <button
-          onClick={() => setActiveView("follow-up")}
-          className="mt-4 pt-3 border-t border-slate-100 flex items-center justify-between text-xs font-bold text-slate-900 hover:text-slate-600 transition-colors cursor-pointer"
+        {/* Card 4: Resolved & Noise Filtered */}
+        <div
+          onClick={() => setActiveView("resolved")}
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group"
+          title="Click to view resolved threads"
         >
-          <span>Inspect {stats.needsFollowUp} Overdue Follow-ups</span>
-          <ArrowRight className="h-3.5 w-3.5" />
-        </button>
-      </div>
-
-      {/* 3. White Card - "Academic Core & Noise Elimination" */}
-      <div className="bg-white text-slate-900 rounded-[32px] p-6 shadow-sm border border-black/[0.04] flex flex-col justify-between">
-        <div>
-          <div className="flex items-center justify-between text-xs mb-4">
-            <span className="font-bold tracking-tight text-sm text-slate-950 flex items-center gap-1.5">
-              <Archive className="h-4 w-4 text-slate-700" />
-              Noise Reduction & Sync
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold text-slate-600">
+              Resolved & Clean
             </span>
-            <span className="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2.5 py-0.5 rounded-full">
-              {noisePercent}% Noise Filtered
-            </span>
+            <div className="h-8 w-8 rounded-xl bg-emerald-50 text-emerald-700 flex items-center justify-center">
+              <CheckCircle2 className="h-4 w-4" />
+            </div>
           </div>
-
-          {/* 2 Prominent Metric Badges */}
-          <div className="grid grid-cols-2 gap-3 mb-4">
-            <div className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col">
-              <span className="text-xs text-slate-500 font-medium">Academic Core</span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-extrabold text-slate-950 font-sans">
-                  {academicThreads.length}
-                </span>
-                <span className="text-[10px] font-semibold text-slate-400">inbox</span>
-              </div>
-              <span className="text-[10px] text-slate-500 font-medium mt-1">
-                Students, exams, admin
+          <div>
+            <div className="text-3xl font-extrabold tracking-tight text-slate-950 font-sans text-emerald-700">
+              {resolvedThreads.length}
+            </div>
+            <div className="text-[11px] font-medium text-slate-500 mt-1 flex items-center justify-between">
+              <span>{noisePercent}% noise deprioritized</span>
+              <span className="text-[10px] font-bold text-black group-hover:underline">
+                Archive →
               </span>
             </div>
-
-            <button
-              onClick={() => setActiveView("other")}
-              className="p-3.5 rounded-2xl bg-slate-50 border border-slate-100 flex flex-col text-left hover:bg-slate-100 transition-colors cursor-pointer"
-              title="View filtered newsletters and notices"
-            >
-              <span className="text-xs text-slate-500 font-medium">Filtered Noise</span>
-              <div className="flex items-baseline gap-1.5 mt-1">
-                <span className="text-2xl font-extrabold text-slate-950 font-sans">
-                  {noiseThreads.length}
-                </span>
-                <span className="text-[10px] font-semibold text-slate-400">bulletins</span>
-              </div>
-              <span className="text-[10px] text-slate-600 font-bold mt-1 flex items-center gap-1">
-                Review &apos;Other&apos; →
-              </span>
-            </button>
           </div>
-
-          <p className="text-[11px] text-slate-500 leading-snug">
-            Campus newsletters, library hours, and IT blasts are safely deprioritized so you focus on student inquiries.
-          </p>
-        </div>
-
-        {/* Bottom Actions */}
-        <div className="flex items-center gap-2 pt-3 border-t border-slate-100 mt-2">
-          <button
-            onClick={syncWithBackend}
-            disabled={isSyncing}
-            className="flex-1 flex items-center justify-center gap-1.5 py-2 px-4 rounded-full bg-black text-white text-xs font-bold hover:bg-slate-800 transition-all cursor-pointer disabled:opacity-50 shadow-xs"
-          >
-            <RefreshCw className={`h-3 w-3 ${isSyncing ? "animate-spin" : ""}`} />
-            <span>{isSyncing ? "Syncing Inbox..." : "Sync Live Inbox"}</span>
-          </button>
         </div>
       </div>
     </div>
