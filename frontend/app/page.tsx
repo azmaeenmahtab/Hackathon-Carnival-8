@@ -75,7 +75,7 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#e9edef] text-slate-900 font-sans antialiased selection:bg-black selection:text-white">
       {/* ── 1. Top Navigation Bar (Floating Rounded Pill) ── */}
-      <div className="sticky top-4 z-50 w-full px-4 sm:px-6 lg:px-8 max-w-5xl mx-auto transition-all duration-300">
+      <div className="sticky top-4 z-50 w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto transition-all duration-300">
         <header className="bg-white/90 backdrop-blur-md border border-black/[0.08] shadow-sm hover:shadow-md rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all duration-300">
           {/* Brand Logo */}
           <Link href="/" className="inline-flex items-center gap-2.5 group shrink-0">
@@ -284,9 +284,9 @@ export default function LandingPage() {
           {/* Mock Window Top Bar */}
           <div className="px-6 py-4 border-b border-slate-100 flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-slate-50/70">
             <div className="flex items-center gap-2">
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
-              <span className="h-2.5 w-2.5 rounded-full bg-slate-300" />
+              <span className="h-3 w-3 rounded-full bg-[#ff5f56] border border-[#e0443e] shadow-2xs hover:opacity-85 transition-opacity" />
+              <span className="h-3 w-3 rounded-full bg-[#ffbd2e] border border-[#dea123] shadow-2xs hover:opacity-85 transition-opacity" />
+              <span className="h-3 w-3 rounded-full bg-[#27c93f] border border-[#1aab29] shadow-2xs hover:opacity-85 transition-opacity" />
               <span className="ml-2 text-xs font-bold text-slate-500">
                 Your Morning Teacher View
               </span>
