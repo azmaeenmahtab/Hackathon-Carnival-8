@@ -104,7 +104,7 @@ export default function Home() {
           }
         }
 
-        router.replace("/login");
+        router.replace("/auth/login");
       } catch {
         // Fallback on network error: check localStorage
         if (typeof window !== "undefined") {
@@ -128,7 +128,7 @@ export default function Home() {
             }
           }
         }
-        router.replace("/login");
+        router.replace("/auth/login");
       }
     }
     checkSession();

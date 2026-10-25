@@ -165,7 +165,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
     setDigest("Sign in to load your AI-triaged inbox.");
     showToast("Signed Out", "You have been logged out of FacultyInbox AI.", "info");
     if (typeof window !== "undefined") {
-      window.location.href = "/login";
+      window.location.href = "/auth/login";
     }
   };
 

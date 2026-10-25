@@ -121,7 +121,7 @@ export function Sidebar() {
 
   const handleSignOut = async () => {
     await signOutUser();
-    router.push("/login");
+    router.push("/auth/login");
   };
 
   return (
@@ -470,7 +470,7 @@ export function Sidebar() {
           </div>
         ) : (
           <Link
-            href="/login"
+            href="/auth/login"
             className="w-full flex items-center justify-center gap-2 py-2.5 px-3 rounded-2xl bg-black hover:bg-slate-900 text-white text-xs font-semibold shadow-xs transition-colors"
           >
             <LogIn className="h-3.5 w-3.5" />
