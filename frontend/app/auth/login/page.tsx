@@ -38,11 +38,34 @@ export default function LoginPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setErrorMessage(null);
+
+    // Client-side validations (avoids default browser validation alert tooltips)
+    if (!email.trim()) {
+      setErrorMessage("Please enter your university email address.");
+      return;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email.trim())) {
+      setErrorMessage("Please enter a valid email address (e.g. professor@university.edu).");
+      return;
+    }
+
+    if (!password) {
+      setErrorMessage("Please enter your account password.");
+      return;
+    }
+
+    if (password.length < 8) {
+      setErrorMessage("Password must be at least 8 characters in length.");
+      return;
+    }
+
     setIsLoading(true);
 
     try {
       const res = await authClient.signIn.email({
-        email,
+        email: email.trim(),
         password,
       });
 
@@ -87,7 +110,7 @@ export default function LoginPage() {
 
   return (
     <div className="bg-white rounded-[28px] p-7 sm:p-9 shadow-sm border border-black/[0.06] space-y-6">
-      {/* Title Header (Clean, direct, no tag pills) */}
+      {/* Title Header */}
       <div className="space-y-1.5">
         <h2 className="text-2xl font-extrabold text-slate-950 tracking-tight">
           Faculty Sign In
@@ -97,16 +120,16 @@ export default function LoginPage() {
         </p>
       </div>
 
-      {/* Error Alert */}
-      {errorMessage && (
-        <div className="p-3.5 rounded-xl bg-slate-50 border border-rose-200 text-xs text-rose-700 flex items-start gap-2.5 animate-in fade-in duration-200">
-          <AlertCircle className="h-4 w-4 text-rose-600 shrink-0 mt-0.5" />
-          <span className="leading-relaxed">{errorMessage}</span>
-        </div>
-      )}
+      {/* Sign In Form with noValidate to suppress default browser alert tooltips */}
+      <form noValidate onSubmit={handleSubmit} className="space-y-4">
+        {/* Form Error Banner at the top of the form */}
+        {errorMessage && (
+          <div className="p-3.5 rounded-xl bg-red-50 border border-red-200 text-xs text-red-700 flex items-start gap-2.5 animate-in fade-in duration-200">
+            <AlertCircle className="h-4 w-4 text-red-600 shrink-0 mt-0.5" />
+            <span className="leading-relaxed font-medium">{errorMessage}</span>
+          </div>
+        )}
 
-      {/* Sign In Form */}
-      <form onSubmit={handleSubmit} className="space-y-4">
         {/* Email Field */}
         <div>
           <label className="block text-xs font-bold text-slate-800 mb-1.5">
@@ -116,9 +139,11 @@ export default function LoginPage() {
             <Mail className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
             <input
               type="email"
-              required
               value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              onChange={(e) => {
+                setEmail(e.target.value);
+                if (errorMessage) setErrorMessage(null);
+              }}
               placeholder="evance@university.edu"
               className="w-full pl-10 pr-3.5 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
@@ -139,10 +164,11 @@ export default function LoginPage() {
             <Lock className="absolute left-3.5 top-3 h-4 w-4 text-slate-400" />
             <input
               type={showPassword ? "text" : "password"}
-              required
-              minLength={8}
               value={password}
-              onChange={(e) => setPassword(e.target.value)}
+              onChange={(e) => {
+                setPassword(e.target.value);
+                if (errorMessage) setErrorMessage(null);
+              }}
               placeholder="••••••••"
               className="w-full pl-10 pr-10 py-2.5 rounded-xl border border-slate-200 bg-white text-xs text-slate-900 placeholder:text-slate-400 focus:outline-none focus:ring-1 focus:ring-black focus:border-black transition-all"
             />
