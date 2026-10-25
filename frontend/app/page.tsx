@@ -195,8 +195,8 @@ export default function LandingPage() {
           MailMind highlights urgent student questions and exam deadlines first, while putting campus newsletters and routine announcements quietly in the background.
         </p>
 
-        {/* New Format: 3-Card Interactive Role Showcase (No small pills) */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3.5 max-w-2xl mx-auto pt-2 text-left">
+        {/* Clean, Spacious 3-Card Role Showcase (No numbering, no dots, highly legible) */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 max-w-3xl mx-auto pt-3 text-left">
           {TARGET_ROLES.map((role, idx) => (
             <div
               key={role}
@@ -207,32 +207,20 @@ export default function LandingPage() {
                   setIsRoleFading(false);
                 }, 150);
               }}
-              className={`p-4 rounded-2xl border transition-all duration-300 cursor-pointer ${
+              className={`p-5 sm:p-6 rounded-2xl sm:rounded-3xl border transition-all duration-300 cursor-pointer ${
                 roleIndex === idx
-                  ? "bg-black text-white border-black shadow-md scale-[1.03] ring-2 ring-black/10"
-                  : "bg-white text-slate-700 border-black/[0.06] hover:border-black/20 hover:bg-slate-50 shadow-2xs"
+                  ? "bg-black text-white border-black shadow-lg scale-[1.02] ring-2 ring-black/10"
+                  : "bg-white text-slate-800 border-black/[0.08] hover:border-black/30 hover:shadow-md shadow-2xs"
               }`}
             >
-              <div className="flex items-center justify-between mb-1">
-                <span
-                  className={`text-[10px] font-bold uppercase tracking-wider ${
-                    roleIndex === idx ? "text-slate-400" : "text-slate-400"
-                  }`}
-                >
-                  0{idx + 1}
-                </span>
-                <span
-                  className={`h-2 w-2 rounded-full ${
-                    roleIndex === idx ? "bg-white animate-pulse" : "bg-slate-300"
-                  }`}
-                />
-              </div>
-              <div className="text-base font-extrabold tracking-tight">
+              <h3 className={`text-lg sm:text-xl font-extrabold tracking-tight ${
+                roleIndex === idx ? "text-white" : "text-slate-950"
+              }`}>
                 {role}
-              </div>
+              </h3>
               <p
-                className={`text-[11px] mt-0.5 leading-snug ${
-                  roleIndex === idx ? "text-slate-300" : "text-slate-400"
+                className={`text-xs sm:text-sm mt-2 leading-relaxed font-medium ${
+                  roleIndex === idx ? "text-slate-300" : "text-slate-600"
                 }`}
               >
                 {idx === 0
@@ -259,7 +247,6 @@ export default function LandingPage() {
             onClick={handleLaunchDemo}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-full bg-white text-slate-900 border border-black/[0.08] hover:border-black active:scale-[0.98] text-xs sm:text-sm font-bold shadow-2xs transition-all cursor-pointer"
           >
-            <Sparkles className="h-4 w-4 text-black" />
             <span>See 1-Minute Live Demo</span>
           </button>
         </div>
