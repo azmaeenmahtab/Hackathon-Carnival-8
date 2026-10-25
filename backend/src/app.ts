@@ -21,7 +21,7 @@ import syncRoutes from "./routes/sync.routes.js";
 const app = express();
 
 // 1. Security headers (Helmet)
-app.use(helmet());
+app.use((helmet as any)());
 
 // 2. CORS with credentials
 const allowedOrigins = env.CORS_ORIGIN.split(",").map((o) => o.trim());
