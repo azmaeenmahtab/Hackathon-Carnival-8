@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   CheckCheck,
   RotateCcw,
@@ -67,36 +68,44 @@ export function ResolvedThreadsView() {
 
   return (
     <div className="space-y-5 select-none">
-      {/* Top Banner */}
-      <div className="bg-[#121214] text-white rounded-[32px] p-6 shadow-sm flex items-start justify-between gap-4">
+      {/* Top Banner (Clean White Card) */}
+      <div className="bg-white rounded-[28px] p-6 shadow-2xs border border-black/[0.06] flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div className="flex items-start gap-4">
-          <div className="h-10 w-10 rounded-2xl bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+          <div className="h-11 w-11 rounded-2xl bg-emerald-50 text-emerald-700 flex items-center justify-center shrink-0">
             <CheckCheck className="h-5 w-5" />
           </div>
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <h2 className="text-base font-bold text-white tracking-tight">
+            <div className="flex items-center gap-2 mb-1 flex-wrap">
+              <h1 className="text-xl font-extrabold text-slate-950 tracking-tight">
                 Resolved Threads Archive
-              </h2>
-              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 font-bold border border-emerald-500/30">
+              </h1>
+              <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-50 text-emerald-800 font-bold border border-emerald-200">
                 {resolvedThreads.length} Stored
               </span>
             </div>
-            <p className="text-xs text-slate-300 leading-relaxed max-w-2xl">
-              Completed consultations, grade reviews, and resolved tasks.
+            <p className="text-xs text-slate-500 leading-relaxed max-w-2xl">
+              Completed student appeals, grade reviews, and resolved administrative tasks.
               Threads are{" "}
-              <span className="font-bold text-amber-300">
-                automatically deleted after 7 days
+              <span className="font-semibold text-slate-900">
+                automatically archived for 7 days
               </span>{" "}
-              to keep the archive clean.
+              prior to sweep.
             </p>
           </div>
         </div>
 
-        {/* TTL Notice */}
-        <div className="shrink-0 flex items-center gap-1.5 text-[10px] text-slate-400 font-semibold bg-white/5 border border-white/10 rounded-2xl px-3 py-1.5">
-          <Trash2 className="h-3 w-3 text-slate-500" />
-          <span>Auto-purge: 7 days</span>
+        <div className="flex items-center gap-2 self-start sm:self-center shrink-0">
+          <div className="flex items-center gap-1.5 text-[10px] text-slate-500 font-semibold bg-slate-50 border border-slate-200 rounded-2xl px-3 py-1.5">
+            <Trash2 className="h-3 w-3 text-slate-400" />
+            <span>Auto-purge: 7 days</span>
+          </div>
+
+          <Link
+            href="/dashboard"
+            className="flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-800 text-xs font-semibold transition-all"
+          >
+            Dashboard
+          </Link>
         </div>
       </div>
 

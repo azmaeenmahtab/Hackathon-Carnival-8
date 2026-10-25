@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import {
   LayoutDashboard,
   Calendar,
@@ -31,6 +31,7 @@ import { ActiveView } from "@/types/threads";
 
 export function Sidebar() {
   const router = useRouter();
+  const pathname = usePathname();
   const {
     activeView,
     setActiveView,
@@ -128,8 +129,8 @@ export function Sidebar() {
     <aside className="w-60 bg-white rounded-[32px] p-5 shadow-sm border border-black/[0.04] flex flex-col justify-between shrink-0 m-4 select-none">
       <div>
         {/* Brand Logo - iDraft style */}
-        <div className="flex items-center gap-2.5 px-2 py-3 mb-6">
-          <div className="h-8 w-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs">
+        <Link href="/dashboard" className="flex items-center gap-2.5 px-2 py-3 mb-6 group">
+          <div className="h-8 w-8 rounded-xl bg-black text-white flex items-center justify-center shadow-xs transition-transform group-hover:scale-105">
             <GraduationCap className="h-4 w-4" />
           </div>
           <div className="flex items-center gap-1.5">
@@ -137,14 +138,14 @@ export function Sidebar() {
               MailMind
             </span>
           </div>
-        </div>
+        </Link>
 
         {/* Main Navigation - Black Pill for Active Item */}
         <nav className="space-y-1">
-          <button
-            onClick={() => setActiveView("dashboard")}
+          <Link
+            href="/dashboard"
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-              activeView === "dashboard"
+              pathname === "/dashboard"
                 ? "bg-[#111113] text-white shadow-sm"
                 : "text-slate-600 hover:text-black hover:bg-slate-50"
             }`}
@@ -153,12 +154,12 @@ export function Sidebar() {
               <LayoutDashboard className="h-4 w-4" />
               <span>Dashboard</span>
             </div>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => setActiveView("all")}
+          <Link
+            href="/dashboard/all"
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-              activeView === "all"
+              pathname === "/dashboard/all"
                 ? "bg-[#111113] text-white shadow-sm"
                 : "text-slate-600 hover:text-black hover:bg-slate-50"
             }`}
@@ -167,17 +168,21 @@ export function Sidebar() {
               <CheckSquare className="h-4 w-4" />
               <span>All Threads</span>
             </div>
-            <span className={`text-[10px] px-2 py-0.5 rounded-full ${
-              activeView === "all" ? "bg-white/20 text-white" : "bg-slate-150 text-slate-700"
-            }`}>
+            <span
+              className={`text-[10px] px-2 py-0.5 rounded-full ${
+                pathname === "/dashboard/all"
+                  ? "bg-white/20 text-white"
+                  : "bg-slate-150 text-slate-700"
+              }`}
+            >
               {stats.totalThreads}
             </span>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => setActiveView("follow-up")}
+          <Link
+            href="/dashboard/follow-up"
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-              activeView === "follow-up"
+              pathname === "/dashboard/follow-up"
                 ? "bg-[#111113] text-white shadow-sm"
                 : "text-slate-600 hover:text-black hover:bg-slate-50"
             }`}
@@ -187,32 +192,36 @@ export function Sidebar() {
               <span>Follow-Up</span>
             </div>
             {stats.needsFollowUp > 0 && (
-              <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                activeView === "follow-up" ? "bg-white text-black" : "bg-black text-white"
-              }`}>
+              <span
+                className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
+                  pathname === "/dashboard/follow-up"
+                    ? "bg-white text-black"
+                    : "bg-black text-white"
+                }`}
+              >
                 {stats.needsFollowUp}
               </span>
             )}
-          </button>
+          </Link>
 
-          <button
-            onClick={() => setActiveView("other")}
+          <Link
+            href="/dashboard/priority/low"
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all ${
-              activeView === "other"
+              pathname === "/dashboard/priority/low"
                 ? "bg-[#111113] text-white shadow-sm"
-                : "text-slate-400 hover:text-slate-700 hover:bg-slate-50"
+                : "text-slate-600 hover:text-black hover:bg-slate-50"
             }`}
           >
             <div className="flex items-center gap-3">
               <Archive className="h-4 w-4" />
               <span>Low Priority</span>
             </div>
-          </button>
+          </Link>
 
-          <button
-            onClick={() => setActiveView("resolved")}
+          <Link
+            href="/dashboard/resolved"
             className={`w-full flex items-center justify-between px-4 py-2.5 rounded-2xl text-xs font-semibold transition-all cursor-pointer ${
-              activeView === "resolved"
+              pathname === "/dashboard/resolved"
                 ? "bg-[#111113] text-white shadow-sm"
                 : "text-slate-600 hover:text-black hover:bg-slate-50"
             }`}
@@ -224,7 +233,7 @@ export function Sidebar() {
             {resolvedThreads.length > 0 && (
               <span
                 className={`text-[10px] px-2 py-0.5 rounded-full font-bold ${
-                  activeView === "resolved"
+                  pathname === "/dashboard/resolved"
                     ? "bg-emerald-500 text-white"
                     : "bg-emerald-50 text-emerald-700 border border-emerald-200/60"
                 }`}
@@ -232,44 +241,29 @@ export function Sidebar() {
                 {resolvedThreads.length}
               </span>
             )}
-          </button>
+          </Link>
         </nav>
 
-        {/* Priority Filter Section with Faded Tones */}
+        {/* Priority Filter Section with Dedicated URL Pages */}
         <div className="mt-8 px-2 space-y-2">
           <div className="flex items-center justify-between text-[10px] font-bold tracking-wider text-slate-400 uppercase mb-1">
             <span>Priority Filter</span>
-            {selectedUrgency !== "All" && (
-              <button
-                onClick={() => {
-                  setSelectedUrgency("All");
-                  if (activeView === "priority") {
-                    setActiveView("all");
-                  }
-                }}
+            {pathname.startsWith("/dashboard/priority") && (
+              <Link
+                href="/dashboard"
                 className="text-[10px] text-slate-500 hover:text-black font-semibold lowercase cursor-pointer"
               >
-                clear
-              </button>
+                dashboard
+              </Link>
             )}
           </div>
           <div className="space-y-1">
             {/* Critical */}
-            <button
-              onClick={() => {
-                if (selectedUrgency === "Critical" && activeView === "priority") {
-                  setSelectedUrgency("All");
-                  setActiveView("all");
-                } else {
-                  setSelectedUrgency("Critical");
-                  if (activeView !== "dashboard") {
-                    setActiveView("priority");
-                  }
-                }
-              }}
+            <Link
+              href="/dashboard/priority/critical"
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                selectedUrgency === "Critical"
-                  ? "bg-rose-50 text-rose-900 ring-1 ring-rose-200"
+                pathname === "/dashboard/priority/critical"
+                  ? "bg-rose-50 text-rose-900 ring-1 ring-rose-300 font-bold"
                   : "text-slate-600 hover:bg-slate-50 hover:text-black"
               }`}
             >
@@ -280,24 +274,14 @@ export function Sidebar() {
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-rose-500/10 text-rose-700 font-bold">
                 {stats.critical}
               </span>
-            </button>
+            </Link>
 
             {/* High */}
-            <button
-              onClick={() => {
-                if (selectedUrgency === "High" && activeView === "priority") {
-                  setSelectedUrgency("All");
-                  setActiveView("all");
-                } else {
-                  setSelectedUrgency("High");
-                  if (activeView !== "dashboard") {
-                    setActiveView("priority");
-                  }
-                }
-              }}
+            <Link
+              href="/dashboard/priority/high"
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                selectedUrgency === "High"
-                  ? "bg-amber-50 text-amber-900 ring-1 ring-amber-200"
+                pathname === "/dashboard/priority/high"
+                  ? "bg-amber-50 text-amber-900 ring-1 ring-amber-300 font-bold"
                   : "text-slate-600 hover:bg-slate-50 hover:text-black"
               }`}
             >
@@ -308,24 +292,14 @@ export function Sidebar() {
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-amber-500/10 text-amber-700 font-bold">
                 {stats.high}
               </span>
-            </button>
+            </Link>
 
             {/* Medium */}
-            <button
-              onClick={() => {
-                if (selectedUrgency === "Medium" && activeView === "priority") {
-                  setSelectedUrgency("All");
-                  setActiveView("all");
-                } else {
-                  setSelectedUrgency("Medium");
-                  if (activeView !== "dashboard") {
-                    setActiveView("priority");
-                  }
-                }
-              }}
+            <Link
+              href="/dashboard/priority/medium"
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                selectedUrgency === "Medium"
-                  ? "bg-sky-50 text-sky-900 ring-1 ring-sky-200"
+                pathname === "/dashboard/priority/medium"
+                  ? "bg-sky-50 text-sky-900 ring-1 ring-sky-300 font-bold"
                   : "text-slate-600 hover:bg-slate-50 hover:text-black"
               }`}
             >
@@ -336,24 +310,14 @@ export function Sidebar() {
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-sky-500/10 text-sky-700 font-medium">
                 {threads.filter((t) => t.urgency === "Medium").length}
               </span>
-            </button>
+            </Link>
 
             {/* Low */}
-            <button
-              onClick={() => {
-                if (selectedUrgency === "Low" && activeView === "priority") {
-                  setSelectedUrgency("All");
-                  setActiveView("all");
-                } else {
-                  setSelectedUrgency("Low");
-                  if (activeView !== "dashboard") {
-                    setActiveView("priority");
-                  }
-                }
-              }}
+            <Link
+              href="/dashboard/priority/low"
               className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all cursor-pointer ${
-                selectedUrgency === "Low"
-                  ? "bg-slate-100 text-slate-900 ring-1 ring-slate-300"
+                pathname === "/dashboard/priority/low"
+                  ? "bg-slate-100 text-slate-900 ring-1 ring-slate-300 font-bold"
                   : "text-slate-500 hover:bg-slate-50 hover:text-black"
               }`}
             >
@@ -364,7 +328,7 @@ export function Sidebar() {
               <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-600 font-medium">
                 {threads.filter((t) => t.urgency === "Low").length}
               </span>
-            </button>
+            </Link>
           </div>
         </div>
 

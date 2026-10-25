@@ -1,6 +1,7 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import {
   ClockAlert,
   Mail,
@@ -8,8 +9,6 @@ import {
   ShieldAlert,
   AlertTriangle,
   ArrowRight,
-  RotateCcw,
-  Sparkles,
 } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
 
@@ -18,9 +17,6 @@ export function PriorityStatStrip() {
     threads,
     resolvedThreads,
     stats,
-    setActiveView,
-    selectedUrgency,
-    setSelectedUrgency,
     batchResolveCriticalThreads,
   } = useThreads();
 
@@ -61,21 +57,13 @@ export function PriorityStatStrip() {
 
           {/* Quick Actions for Emergency Mails */}
           <div className="flex items-center gap-2 shrink-0 flex-wrap">
-            <button
-              onClick={() =>
-                setSelectedUrgency(
-                  selectedUrgency === "Critical" ? "All" : "Critical"
-                )
-              }
+            <Link
+              href="/dashboard/priority/critical"
               className="px-4 py-2 rounded-xl bg-black hover:bg-slate-800 text-white text-xs font-bold transition-all shadow-xs cursor-pointer flex items-center gap-1.5"
             >
-              <span>
-                {selectedUrgency === "Critical"
-                  ? "Show All Mails"
-                  : "Check Emergency Mails ASAP"}
-              </span>
+              <span>Check Emergency Mails ASAP</span>
               <ArrowRight className="h-3.5 w-3.5" />
-            </button>
+            </Link>
 
             {stats.critical > 0 && (
               <button
@@ -108,22 +96,10 @@ export function PriorityStatStrip() {
       {/* ── 2. Standard Industry Practice: 4 Clean Unified Metric Cards ── */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
         {/* Card 1: Emergency & High Priority */}
-        <div
-          onClick={() =>
-            setSelectedUrgency(
-              selectedUrgency === "Critical"
-                ? "All"
-                : stats.critical > 0
-                ? "Critical"
-                : "High"
-            )
-          }
-          className={`p-4 sm:p-5 rounded-2xl bg-white border transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group ${
-            selectedUrgency === "Critical" || selectedUrgency === "High"
-              ? "border-black ring-2 ring-black/5"
-              : "border-black/[0.06] hover:border-black/20"
-          }`}
-          title="Click to filter urgent correspondence"
+        <Link
+          href={stats.critical > 0 ? "/dashboard/priority/critical" : "/dashboard/priority/high"}
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group block"
+          title="Click to view urgent correspondence"
         >
           <div className="flex items-center justify-between mb-3">
             <span className="text-xs font-bold text-slate-600">
@@ -163,16 +139,16 @@ export function PriorityStatStrip() {
                 · {stats.high} High
               </span>
               <span className="text-[10px] font-bold text-black group-hover:underline">
-                {selectedUrgency === "Critical" ? "Filtered" : "Filter →"}
+                View →
               </span>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Card 2: Needs Follow-Up */}
-        <div
-          onClick={() => setActiveView("follow-up")}
-          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group"
+        <Link
+          href="/dashboard/follow-up"
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group block"
           title="Click to view follow-up queue"
         >
           <div className="flex items-center justify-between mb-3">
@@ -194,15 +170,12 @@ export function PriorityStatStrip() {
               </span>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Card 3: Unread Messages */}
-        <div
-          onClick={() => {
-            setSelectedUrgency("All");
-            setActiveView("dashboard");
-          }}
-          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group"
+        <Link
+          href="/dashboard/all"
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group block"
           title="Total unread correspondence"
         >
           <div className="flex items-center justify-between mb-3">
@@ -224,12 +197,12 @@ export function PriorityStatStrip() {
               </span>
             </div>
           </div>
-        </div>
+        </Link>
 
         {/* Card 4: Resolved & Noise Filtered */}
-        <div
-          onClick={() => setActiveView("resolved")}
-          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group"
+        <Link
+          href="/dashboard/resolved"
+          className="p-4 sm:p-5 rounded-2xl bg-white border border-black/[0.06] hover:border-black/20 transition-all cursor-pointer flex flex-col justify-between shadow-2xs hover:shadow-xs group block"
           title="Click to view resolved threads"
         >
           <div className="flex items-center justify-between mb-3">
@@ -251,7 +224,7 @@ export function PriorityStatStrip() {
               </span>
             </div>
           </div>
-        </div>
+        </Link>
       </div>
     </div>
   );
