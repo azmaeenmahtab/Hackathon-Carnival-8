@@ -168,12 +168,12 @@ export default function DashboardLayout({
     : "FI";
 
   return (
-    <div className="min-h-screen flex font-sans antialiased text-slate-900 bg-[#e9edef] select-none">
-      {/* Persistent Floating White Sidebar */}
+    <div className="h-screen max-h-screen w-full overflow-hidden flex font-sans antialiased text-slate-900 bg-[#e9edef] select-none">
+      {/* Persistent Floating White Sidebar - Sticky & Stationary */}
       <Sidebar />
 
-      {/* Main Content Area */}
-      <main className="flex-1 flex flex-col min-w-0 h-screen overflow-y-auto pr-6 py-4">
+      {/* Main Content Area - Only this area scrolls */}
+      <main className="flex-1 flex flex-col min-w-0 h-full overflow-y-auto pr-6 py-4">
         {/* Top Header Bar */}
         <header className="flex items-center justify-between pb-6 pt-2 shrink-0">
           <div>

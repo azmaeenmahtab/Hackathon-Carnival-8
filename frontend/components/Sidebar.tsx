@@ -126,7 +126,7 @@ export function Sidebar() {
   };
 
   return (
-    <aside className="w-60 bg-white rounded-[32px] p-5 shadow-sm border border-black/[0.04] flex flex-col justify-between shrink-0 m-4 select-none">
+    <aside className="w-60 bg-white rounded-[32px] p-5 shadow-sm border border-black/[0.04] flex flex-col justify-between shrink-0 m-4 select-none sticky top-4 self-start h-[calc(100vh-2rem)] overflow-y-auto [&::-webkit-scrollbar]:hidden [-ms-overflow-style:none] [scrollbar-width:none] z-30">
       <div>
         {/* Brand Logo - iDraft style */}
         <Link href="/dashboard" className="flex items-center gap-2.5 px-2 py-3 mb-6 group">
