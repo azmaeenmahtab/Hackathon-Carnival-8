@@ -136,17 +136,27 @@ export default function LandingPage() {
 
       {/* ── 2. Hero Section ── */}
       <section className="pt-16 pb-12 sm:pt-20 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
-        {/* University Email Intelligence Kicker */}
-        <div className="text-xs font-extrabold tracking-widest uppercase text-slate-500 flex items-center justify-center gap-2">
-          <span className="h-1.5 w-1.5 rounded-full bg-black" />
-          <span>University Email Intelligence</span>
-        </div>
-
-        {/* Main Headline (Preserved exactly as user requested) */}
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 leading-[1.12] max-w-4xl mx-auto animate-fade-in-up">
-          Spend less time sorting emails.
+        {/* Main Headline with Creative Contrast Highlights */}
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-extrabold tracking-tight text-slate-950 leading-[1.18] max-w-4xl mx-auto animate-fade-in-up">
+          Spend{" "}
+          <span className="relative inline-block mx-1">
+            <span className="relative z-10 text-slate-800 font-black underline decoration-slate-400 decoration-wavy decoration-2 underline-offset-8">
+              less time
+            </span>
+            <span className="absolute -top-3.5 sm:-top-4 -right-3 sm:-right-4 px-2 py-0.5 rounded-full bg-slate-200 text-slate-700 text-[10px] sm:text-xs font-mono font-bold tracking-tight border border-black/5 shadow-2xs hidden sm:inline-flex items-center gap-0.5">
+              <span>↓</span>
+              <span>5 hrs/wk</span>
+            </span>
+          </span>{" "}
+          sorting emails.
           <br className="hidden sm:inline" />
-          <span className="text-slate-950">Spend more time teaching.</span>
+          Spend{" "}
+          <span className="relative inline-block mx-1">
+            <span className="relative z-10 px-3.5 sm:px-4 py-0.5 sm:py-1 rounded-2xl bg-black text-white font-black shadow-md inline-flex items-center gap-2 transform -rotate-1 hover:rotate-0 transition-transform duration-300">
+              <span>more teaching.</span>
+              <Sparkles className="h-4 w-4 sm:h-5 sm:w-5 text-amber-300 animate-pulse shrink-0" />
+            </span>
+          </span>
         </h1>
 
         {/* Big Format Dynamic Role Ticker - NOT in a pill, large bold typography */}
