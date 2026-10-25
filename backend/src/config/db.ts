@@ -9,13 +9,15 @@ export async function connectDB(): Promise<typeof mongoose> {
     return mongoose;
   }
 
-  if (cachedPromise) {
+  // Reuse in-flight connection if connecting
+  if (cachedPromise && mongoose.connection.readyState === 2) {
     return cachedPromise;
   }
 
   try {
     cachedPromise = mongoose.connect(env.MONGODB_URI, {
       dbName: env.MONGODB_DB_NAME,
+      bufferCommands: false,
     });
     const conn = await cachedPromise;
     logger.info(
