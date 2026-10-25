@@ -278,7 +278,7 @@ export function ThreadList({ onOpenSimulate }: { onOpenSimulate?: () => void }) 
             <Plus className="h-4 w-4" />
           </div>
           <div>
-            <span className="font-bold text-xs block">+ Test Inbound Email</span>
+            <span className="font-bold text-xs block">Test Inbound Email</span>
             <p className="text-[10px] text-slate-400">
               Simulate a real incoming email &amp; run live AI triage
             </p>
