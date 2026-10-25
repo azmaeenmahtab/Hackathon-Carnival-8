@@ -23,6 +23,7 @@ import {
   Mail,
   RefreshCw,
   Unlink,
+  Trash2,
 } from "lucide-react";
 import { useThreads } from "@/context/ThreadsContext";
 import { apiClient } from "@/lib/apiClient";
@@ -42,6 +43,7 @@ export function Sidebar() {
     signOutUser,
     showToast,
     refreshThreads,
+    purgeDemoThreads,
   } = useThreads();
 
   const [gmailStatus, setGmailStatus] = React.useState<{
@@ -425,6 +427,16 @@ export function Sidebar() {
                   <span>{isConnectingGmail ? "Connecting…" : "Connect Gmail"}</span>
                 </button>
               </div>
+            )}
+
+            {threads.some((t) => t.id.startsWith("th-mock-") || t.id.startsWith("th-0") || t.id.startsWith("mock-")) && (
+              <button
+                onClick={() => purgeDemoThreads()}
+                className="w-full flex items-center justify-center gap-1.5 py-1.5 px-2 rounded-xl bg-rose-50 text-rose-700 hover:bg-rose-100 text-[10px] font-bold transition-colors border border-rose-200/60 cursor-pointer"
+              >
+                <Trash2 className="h-3 w-3" />
+                <span>Remove Demo Emails</span>
+              </button>
             )}
           </div>
         </div>

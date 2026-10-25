@@ -269,3 +269,56 @@ export async function restoreResolvedThread(
     next(error);
   }
 }
+
+export async function purgeDemoThreads(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user!.id;
+    const mongoose = (await import("mongoose")).default;
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const { Thread } = await import("../models/Thread.js");
+    const { DigestCache } = await import("../models/DigestCache.js");
+
+    const deleteResult = await Thread.deleteMany({
+      userId: userObjectId,
+      externalThreadId: { $regex: /^(th-mock-|th-0|mock)/i },
+    });
+
+    await DigestCache.deleteOne({ userId: userObjectId });
+
+    return sendSuccess(res, {
+      deletedCount: deleteResult.deletedCount,
+      message: `Cleared ${deleteResult.deletedCount} demo emails from your inbox.`,
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+
+export async function clearAllThreads(
+  req: Request,
+  res: Response,
+  next: NextFunction
+) {
+  try {
+    const userId = req.user!.id;
+    const mongoose = (await import("mongoose")).default;
+    const userObjectId = new mongoose.Types.ObjectId(userId);
+    const { Thread } = await import("../models/Thread.js");
+    const { DigestCache } = await import("../models/DigestCache.js");
+
+    const deleteResult = await Thread.deleteMany({ userId: userObjectId });
+    await DigestCache.deleteOne({ userId: userObjectId });
+
+    return sendSuccess(res, {
+      deletedCount: deleteResult.deletedCount,
+      message: "All threads have been cleared from your inbox.",
+    });
+  } catch (error) {
+    next(error);
+  }
+}
+

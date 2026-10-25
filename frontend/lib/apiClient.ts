@@ -332,4 +332,28 @@ export const apiClient = {
       return null;
     }
   },
+
+  async purgeDemoThreads(): Promise<boolean> {
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/threads/purge-demo`,
+        getRequestOptions({ method: "POST" })
+      );
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
+
+  async clearAllThreads(): Promise<boolean> {
+    try {
+      const res = await fetch(
+        `${API_BASE}/api/threads/clear-all`,
+        getRequestOptions({ method: "POST" })
+      );
+      return res.ok;
+    } catch {
+      return false;
+    }
+  },
 };

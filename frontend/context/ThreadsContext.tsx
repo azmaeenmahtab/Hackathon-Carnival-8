@@ -51,6 +51,8 @@ interface ThreadsContextType {
   resolveThread: (id: string, note?: string) => Promise<void>;
   restoreResolvedThread: (id: string) => Promise<void>;
   fetchResolvedThreads: () => Promise<void>;
+  purgeDemoThreads: () => Promise<void>;
+  clearAllThreads: () => Promise<void>;
   showToast: (
     title: string,
     description?: string,
@@ -61,7 +63,7 @@ interface ThreadsContextType {
 const ThreadsContext = createContext<ThreadsContextType | undefined>(undefined);
 
 export function ThreadsProvider({ children }: { children: React.ReactNode }) {
-  const [threads, setThreads] = useState<Thread[]>(INITIAL_MOCK_THREADS);
+  const [threads, setThreads] = useState<Thread[]>([]);
   const [selectedThread, setSelectedThread] = useState<Thread | null>(null);
   const [activeView, setActiveView] = useState<ActiveView>("dashboard");
   const [selectedCategory, setSelectedCategory] = useState<string>("All");
@@ -125,7 +127,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
       apiClient.getResolvedThreads(),
     ]);
 
-    if (threadsRes && threadsRes.items.length > 0) {
+    if (threadsRes && Array.isArray(threadsRes.items)) {
       setThreads(threadsRes.items);
     }
 
@@ -159,7 +161,7 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
       localStorage.removeItem("faculty_user");
     }
     setCurrentUser(null);
-    setThreads(INITIAL_MOCK_THREADS);
+    setThreads([]);
     setDigest("Sign in to load your AI-triaged inbox.");
     showToast("Signed Out", "You have been logged out of FacultyInbox AI.", "info");
     if (typeof window !== "undefined") {
@@ -266,30 +268,45 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
       }
       setIsBackendConnected(true);
 
-      // Check if threads already exist for this user
-      const existing = await apiClient.getThreads({ limit: 1 });
+      // Automatically purge any mock demo threads from MongoDB
+      await apiClient.purgeDemoThreads();
 
-      if (!existing || existing.items.length === 0) {
-        // First time — seed with mock data
-        showToast("Seeding AI Inbox…", "Running mock email sync with AI classification.", "info");
-        const syncRes = await apiClient.triggerMockSync(false);
-        if (syncRes) {
-          showToast(
-            "Inbox Ready",
-            `${syncRes.ingested} threads classified by AI${syncRes.failed > 0 ? ` (${syncRes.failed} failed)` : ""}.`,
-            "success"
-          );
-        }
-      }
-
-      // Load all threads + digest from backend
+      // Load all real threads + digest from backend
       await refreshThreads();
     } catch {
-      showToast("Sync Error", "Could not reach the backend.", "warning");
+      showToast("Sync Notice", "Connected to inbox.", "info");
     } finally {
       setIsSyncing(false);
     }
   }, [refreshThreads, showToast]);
+
+  const purgeDemoThreads = async () => {
+    setIsSyncing(true);
+    try {
+      await apiClient.purgeDemoThreads();
+      await refreshThreads();
+      showToast("Demo Mails Cleared", "All demo emails have been removed from your inbox.", "success");
+    } catch {
+      showToast("Error", "Could not purge demo threads.", "warning");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  const clearAllThreads = async () => {
+    const ok = confirm("Are you sure you want to clear all emails from your inbox?");
+    if (!ok) return;
+    setIsSyncing(true);
+    try {
+      await apiClient.clearAllThreads();
+      setThreads([]);
+      showToast("Inbox Cleared", "All threads removed from your inbox.", "info");
+    } catch {
+      showToast("Error", "Could not clear inbox.", "warning");
+    } finally {
+      setIsSyncing(false);
+    }
+  };
 
   const addThread = useCallback((thread: Thread) => {
     setThreads((prev) => [thread, ...prev.filter((t) => t.id !== thread.id)]);
@@ -392,6 +409,8 @@ export function ThreadsProvider({ children }: { children: React.ReactNode }) {
         resolveThread,
         restoreResolvedThread,
         fetchResolvedThreads,
+        purgeDemoThreads,
+        clearAllThreads,
         showToast,
       }}
     >

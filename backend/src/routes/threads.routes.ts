@@ -11,12 +11,20 @@ import {
   resolveThread,
   listResolvedThreads,
   restoreResolvedThread,
+  purgeDemoThreads,
+  clearAllThreads,
 } from "../controllers/threads.controller.js";
 import { validate } from "../middleware/validate.js";
 import { THREAD_CATEGORIES } from "../models/Thread.js";
 import { pruneOldResolvedThreads } from "../utils/resolvedThreadCleanup.js";
 
 const router = Router();
+
+// Purge / Clear routes (must be before :id param)
+router.post("/purge-demo", purgeDemoThreads);
+router.delete("/purge-demo", purgeDemoThreads);
+router.post("/clear-all", clearAllThreads);
+router.delete("/clear-all", clearAllThreads);
 
 const markReadSchema = {
   body: z.object({
