@@ -35,6 +35,14 @@ export default function LandingPage() {
   const [roleIndex, setRoleIndex] = useState(0);
   const [isRoleFading, setIsRoleFading] = useState(false);
 
+  const navLinks = [
+    { href: "#how-it-helps", label: "Why Teachers Use It" },
+    { href: "#demo-preview", label: "Interactive Demo" },
+    { href: "#how-it-works", label: "How It Works" },
+    { href: "#privacy", label: "Privacy & Safety" },
+    { href: "#faq", label: "FAQ" },
+  ];
+
   // Auto-cycle through target roles one by one
   useEffect(() => {
     const roleTimer = setInterval(() => {
@@ -75,85 +83,69 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-[#e9edef] text-slate-900 font-sans antialiased selection:bg-black selection:text-white">
       {/* ── 1. Top Navigation Bar (Floating Rounded Pill) ── */}
-      <div className="sticky top-4 z-50 w-full px-4 sm:px-6 lg:px-8 max-w-7xl mx-auto transition-all duration-300">
-        <header className="bg-white/90 backdrop-blur-md border border-black/[0.08] shadow-sm hover:shadow-md rounded-full px-4 sm:px-6 py-2.5 flex items-center justify-between transition-all duration-300">
-          {/* Brand Logo */}
-          <Link href="/" className="inline-flex items-center gap-2.5 group shrink-0">
-            <div className="h-8 w-8 rounded-full bg-black text-white flex items-center justify-center shadow-xs transition-transform duration-300 group-hover:scale-105">
-              <GraduationCap className="h-4 w-4" />
-            </div>
-            <span className="font-extrabold text-lg tracking-tight text-slate-950">
-              MailMind
-            </span>
+      <div className="sticky top-0 z-50 w-full transition-all duration-300 ">
+        <header className="w-full bg-white/90 backdrop-blur-md border-b border-black/10 rounded-b-xl transition-shadow duration-300 hover:shadow-sm">
+  <div className="flex items-stretch justify-between h-16">
+    {/* Brand Logo cell */}
+    <Link
+      href="/"
+      className="group inline-flex items-center gap-2.5 px-4 sm:px-6 border-r border-black/10 shrink-0"
+    >
+      <div className="h-8 w-8 bg-black text-white flex items-center justify-center transition-transform duration-300 group-hover:scale-105">
+        <GraduationCap className="h-4 w-4" />
+      </div>
+      <span className="font-extrabold text-lg tracking-tight text-slate-950">
+        MailMind
+      </span>
+    </Link>
+
+    {/* Desktop Navigation Links */}
+    <nav className="hidden md:flex items-stretch flex-1 justify-end">
+      {navLinks.map((link) => (
+        <a
+          key={link.href}
+          href={link.href}
+          className="flex items-center px-5 text-[11px] font-semibold uppercase tracking-wider text-slate-600 border-l border-black/10 hover:text-black hover:bg-slate-100 transition-colors duration-200"
+        >
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    {/* Auth Action CTAs cell */}
+    <div className="flex items-center gap-2 px-4 sm:px-6 border-l border-black/10 shrink-0">
+      {hasSession ? (
+        <Link
+          href="/dashboard"
+          className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-black text-white text-[11px] font-bold uppercase tracking-wider hover:bg-slate-800 active:scale-[0.98] transition-all"
+        >
+          <span>Go to Inbox</span>
+          <ArrowRight className="h-3.5 w-3.5" />
+        </Link>
+      ) : (
+        <>
+          <Link
+            href="/auth/login"
+            className="px-4 py-2.5 text-[11px] font-bold uppercase tracking-wider text-slate-700 hover:text-black hover:bg-slate-100 transition-colors duration-200"
+          >
+            Sign In
           </Link>
-
-          {/* Desktop Navigation Links - Segmented Pill Capsule matching landing page */}
-          <nav className="hidden md:flex items-center gap-1 text-xs font-semibold text-slate-600 bg-slate-100/90 p-1 rounded-full border border-black/[0.04]">
-            <a
-              href="#how-it-helps"
-              className="px-3.5 py-1.5 rounded-full hover:text-black hover:bg-white hover:shadow-2xs transition-all duration-200"
-            >
-              Why Teachers Use It
-            </a>
-            <a
-              href="#demo-preview"
-              className="px-3.5 py-1.5 rounded-full hover:text-black hover:bg-white hover:shadow-2xs transition-all duration-200"
-            >
-              Interactive Demo
-            </a>
-            <a
-              href="#how-it-works"
-              className="px-3.5 py-1.5 rounded-full hover:text-black hover:bg-white hover:shadow-2xs transition-all duration-200"
-            >
-              How It Works
-            </a>
-            <a
-              href="#privacy"
-              className="px-3.5 py-1.5 rounded-full hover:text-black hover:bg-white hover:shadow-2xs transition-all duration-200"
-            >
-              Privacy &amp; Safety
-            </a>
-            <a
-              href="#faq"
-              className="px-3.5 py-1.5 rounded-full hover:text-black hover:bg-white hover:shadow-2xs transition-all duration-200"
-            >
-              FAQ
-            </a>
-          </nav>
-
-          {/* Auth Action CTAs */}
-          <div className="flex items-center gap-2 shrink-0">
-            {hasSession ? (
-              <Link
-                href="/dashboard"
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black text-white text-xs font-bold hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xs"
-              >
-                <span>Go to Inbox</span>
-                <ArrowRight className="h-3.5 w-3.5" />
-              </Link>
-            ) : (
-              <>
-                <Link
-                  href="/auth/login"
-                  className="text-xs font-bold text-slate-700 hover:text-black px-3 py-1.5 rounded-full hover:bg-slate-100 transition-all duration-200"
-                >
-                  Sign In
-                </Link>
-                <Link
-                  href="/auth/signup"
-                  className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-black text-white text-xs font-bold hover:bg-slate-800 active:scale-[0.98] transition-all shadow-xs"
-                >
-                  <span>Start Free</span>
-                  <ArrowRight className="h-3.5 w-3.5" />
-                </Link>
-              </>
-            )}
-          </div>
-        </header>
+          <Link
+            href="/auth/signup"
+            className="inline-flex items-center gap-1.5 px-5 py-2.5 bg-black text-white text-[11px] font-bold uppercase tracking-wider hover:bg-slate-800 active:scale-[0.98] transition-all"
+          >
+            <span>Start Free</span>
+            <ArrowRight className="h-3.5 w-3.5" />
+          </Link>
+        </>
+      )}
+    </div>
+  </div>
+</header>
       </div>
 
       {/* ── 2. Hero Section ── */}
-      <section className="pt-12 pb-12 sm:pt-14 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
+      <section className="pt-8 pb-12 sm:pt-10 sm:pb-16 px-4 sm:px-6 lg:px-8 max-w-4xl mx-auto text-center space-y-6">
         {/* Main Headline with Creative Contrast Highlights */}
         <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight text-slate-950 leading-[1.2] max-w-4xl mx-auto animate-fade-in-up">
           <span className="inline-block">
