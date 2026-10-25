@@ -2,7 +2,7 @@ import rateLimit from "express-rate-limit";
 import { Request, Response } from "express";
 import { sendError } from "../utils/apiResponse.js";
 
-export const globalRateLimiter = rateLimit({
+export const globalRateLimiter = (rateLimit as any)({
   windowMs: 15 * 60 * 1000,
   limit: 300,
   standardHeaders: true,
@@ -17,7 +17,7 @@ export const globalRateLimiter = rateLimit({
   },
 });
 
-export const syncRateLimiter = rateLimit({
+export const syncRateLimiter = (rateLimit as any)({
   windowMs: 60 * 1000,
   limit: 10,
   standardHeaders: true,
